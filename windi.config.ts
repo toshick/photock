@@ -12,6 +12,7 @@ export default defineConfig({
           fontWeight: '600',
         },
         '.btn-blue': {
+          padding: '.5rem 1rem',
           backgroundColor: '#3490dc',
           color: '#fff',
           '&:hover': {
@@ -19,6 +20,7 @@ export default defineConfig({
           },
         },
         '.btn-red': {
+          padding: '.5rem 1rem',
           backgroundColor: '#e3342f',
           color: '#fff',
           '&:hover': {
