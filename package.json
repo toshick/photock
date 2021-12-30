@@ -14,6 +14,11 @@
     "eslint-plugin-vue": "^8.2.0",
     "nuxt-windicss": "^2.1.1",
     "nuxt3": "latest",
-    "prettier": "^2.5.1"
+    "prettier": "^2.5.1",
+    "sass": "^1.45.1"
+  },
+  "dependencies": {
+    "@oruga-ui/oruga-next": "^0.4.8",
+    "@oruga-ui/theme-bulma": "^0.1.5"
   }
 }

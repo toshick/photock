@@ -8,17 +8,13 @@ const JSON_FILE_NAME = 'data.json';
  */
 exports.getFiles = (path) => {
   return new Promise((resolve) => {
-    return glob(`${path}/**/*`, (err, files) => {
+    return glob(`${path}`, (err, files) => {
       if (err) {
         resolve(null);
         return;
       }
-      const ret = files.filter((file) => {
-        console.log('file', file);
-        if (file.toLowerCase().match(/(jpg|jpeg|png|gif)$/)) return true;
-        return false;
-      });
-      resolve(ret);
+
+      resolve(files);
     });
   });
 };

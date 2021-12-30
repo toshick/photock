@@ -3,6 +3,13 @@ import plugin from 'windicss/plugin';
 
 export default defineConfig({
   // safelist: 'p-1 p-2 p-3 p-4',
+  theme: {
+    extend: {
+      colors: {
+        primary: '#b82b19',
+      },
+    },
+  },
   plugins: [
     plugin(({ addComponents }) => {
       const buttons = {
