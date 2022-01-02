@@ -1,11 +1,6 @@
 <template>
   <transition name="fade">
-    <o-modal
-      :active="props.active"
-      class="modal-loading"
-      :canCancel="[]"
-      animation=""
-    >
+    <o-modal :active="active" class="modal-loading" :canCancel="[]" ref="modal">
       <p style="text-align: center">
         <img src="/img/gohan.png" />
       </p>
@@ -19,6 +14,28 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+});
+const modal = ref(null);
+//----------------------
+// state
+//----------------------
+const s = reactive({
+  name: '',
+  active: false,
+});
+const active = computed(() => s.active);
+const doClose = () => {
+  if (modal && modal.value?.close) {
+    modal.value?.close();
+    s.active = false;
+  }
+};
+watchEffect(() => {
+  if (props.active) {
+    s.active = props.active;
+  } else {
+    doClose();
+  }
 });
 </script>
 

@@ -21,7 +21,7 @@ const props = defineProps({
   },
 });
 
-const { albums } = props;
+const albums = computed(() => props.albums);
 </script>
 
 <style scoped lang="scss">
@@ -40,7 +40,7 @@ const { albums } = props;
   background-color: #f7f7f7;
   background-image: url('/img/60-lines.png');
   &:hover {
-    background-color: #fff;
+    background-color: #f9f9f9;
   }
 }
 </style>

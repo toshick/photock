@@ -1,3 +1,7 @@
+export type AppState = {
+  appName: string;
+};
+
 export type Album = {
   name: string;
   path: string;

@@ -1,9 +1,20 @@
 <template>
   <main class>
     <GlobalHeader>
-      <o-button size="small" variant="primary" @click="onClickAlbumCreate"
-        >新規アルバム</o-button
-      >
+      <o-dropdown position="bottom-right">
+        <template #trigger>
+          <o-button size="small" variant="primary">新規アルバム</o-button>
+        </template>
+
+        <o-field class="px-3">
+          <o-input
+            placeholder="アルバムID"
+            size="small"
+            @icon-click="() => {}"
+          ></o-input>
+          <o-button size="small" variant="primary">追加</o-button>
+        </o-field>
+      </o-dropdown>
     </GlobalHeader>
 
     <section class="container py-3">
@@ -30,6 +41,12 @@
       </div>
     </section>
     <LoadingOverlay :active="s.isImageModalActive" />
+    <FormModal
+      title="アルバム名"
+      :show="s.visibleFormModal"
+      @close="s.visibleFormModal = false"
+    />
+    {{ appState }}
   </main>
 </template>
 
@@ -37,9 +54,10 @@
 import { useNuxtApp } from '#app';
 import type { Album } from '@/types/apptype';
 import { callPost } from '@/util/fetch';
-const { $router } = useNuxtApp();
+const { $router, $oruga } = useNuxtApp();
 type State = {
   isImageModalActive: boolean;
+  visibleFormModal: boolean;
 };
 
 //----------------------
@@ -47,13 +65,14 @@ type State = {
 //----------------------
 const s = reactive<State>({
   isImageModalActive: false,
+  visibleFormModal: false,
 });
 
 //----------------------
-// fetch
+// use
 //----------------------
-const { data, pending, refresh, error } = useLazyFetch('/api/albums');
-const albums: Album[] = data?.value?.albums || [];
+const { appState } = useAppState();
+const { albums, refresh } = useAlbumList();
 
 //----------------------
 // func
@@ -70,7 +89,15 @@ const refetchAlbum = () => {
 const onClickAlbum = (album: Album) => {
   $router.push(`/albums/${album.name}`);
 };
-const onClickAlbumCreate = async () => {
+const onClickAlbumCreate = () => {
+  s.visibleFormModal = true;
+  appState.appName = 'うううう';
+};
+const onClose = () => {
+  console.log('onCloseだ');
+};
+
+const createAlbum = async () => {
   const album: Album = {
     name: 'dummy',
     path: '',
@@ -81,5 +108,6 @@ const onClickAlbumCreate = async () => {
     ...album,
   });
   console.log('res', res);
+  refresh();
 };
 </script>

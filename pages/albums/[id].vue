@@ -33,14 +33,10 @@ import { useNuxtApp } from '#app';
 import type { Album } from '@/types/apptype';
 const { id: albumId } = useRoute().params;
 
-console.log('albumId', albumId);
 //----------------------
-// fetch
+// use
 //----------------------
-const { data, pending, refresh, error } = useLazyFetch(
-  `/api/albums/${albumId}`,
-);
-const albumData = data?.value || null;
+const { albumData } = useAlbumDetail(albumId);
 onMounted(() => {
   console.log('$router');
 });

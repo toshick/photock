@@ -1,0 +1,12 @@
+/* ------------------ */
+//  components
+/* ------------------ */
+.dropdown.is-bottom-right {
+  .dropdown-menu {
+    left: auto;
+    right: 0;
+    top: 30%;
+    margin-top: 3px;
+    box-shadow: 0 0px 2px 1px rgba(black, 0.2);
+  }
+}

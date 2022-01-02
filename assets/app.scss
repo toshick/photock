@@ -92,4 +92,5 @@ $modal-background-background-color: rgba(white, 0.8);
 }
 
 @import 'bulma/bulma';
-@import '@oruga-ui/theme-bulma/dist/scss/bulma';
+// @import '@oruga-ui/theme-bulma/dist/scss/bulma';
+@import './_components.scss';

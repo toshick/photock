@@ -1,4 +1,4 @@
-// import type { Album } from '@/types/apptype';
+import type { AppState } from '@/types/apptype';
 
 export const useFuga = () => {
   const counter = ref(0);
@@ -6,20 +6,35 @@ export const useFuga = () => {
   return { counter, increment };
 };
 
-// export const useAlbum = () => {
-//   const ref = reactive<{ list: Album[] }>({
-//     list: [],
-//   });
+/**
+ * useAppState
+ */
+export const useAppState = () => {
+  const appState = reactive<AppState>({
+    appName: 'ほんなこつ',
+  });
 
-//   const fetch = async () => {
-//     const res: any = await useFetch('/api/albums');
-//     console.log('res', res);
-//     if (res.albums) {
-//       ref.list = res.albums;
-//     }
-//   };
+  return { appState };
+};
 
-//   fetch();
+/**
+ * useAlbumList
+ */
+export const useAlbumList = () => {
+  const { data, pending, refresh, error } = useLazyFetch('/api/albums');
+  const albums = computed(() => data?.value?.albums || []);
 
-//   return { albums: ref.list, fetch };
-// };
+  return { albums, refresh };
+};
+
+/**
+ * useAlbumDetail
+ */
+export const useAlbumDetail = (albumId: string) => {
+  const { data, pending, refresh, error } = useLazyFetch(
+    `/api/albums/${albumId}`,
+  );
+  const albumData = computed(() => data?.value || null);
+
+  return { albumData, refresh };
+};
