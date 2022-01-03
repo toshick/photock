@@ -4,6 +4,7 @@
 :root {
   --primary-color: #e7796a;
   --second-color: #ffff8c;
+  --danger-color: #ff3333;
 }
 
 /* ------------------ */
@@ -94,3 +95,23 @@ $modal-background-background-color: rgba(white, 0.8);
 @import 'bulma/bulma';
 // @import '@oruga-ui/theme-bulma/dist/scss/bulma';
 @import './_components.scss';
+
+/* ------------------ */
+// form
+/* ------------------ */
+.input,
+.textarea {
+  box-shadow: none;
+  -moz-box-shadow: none;
+  -webkit-box-shadow: none;
+}
+.input:focus,
+.textarea:focus,
+.button:focus {
+  outline: none !important;
+  outline-width: 0 !important;
+  border-color: #ddd;
+  box-shadow: none !important;
+  -moz-box-shadow: none;
+  -webkit-box-shadow: none;
+}

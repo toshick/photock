@@ -19,6 +19,9 @@
   },
   "dependencies": {
     "@oruga-ui/oruga-next": "^0.4.8",
-    "@oruga-ui/theme-bulma": "^0.1.5"
+    "@oruga-ui/theme-bulma": "^0.1.5",
+    "i18next": "^21.6.4",
+    "vee-validate": "^4.5.7",
+    "yup": "^0.32.11"
   }
 }
