@@ -8,3 +8,9 @@ export type Album = {
   thumbnail?: string;
   description?: string;
 };
+
+export type FileData = {
+  file: File;
+  src: string;
+  alt: string;
+};

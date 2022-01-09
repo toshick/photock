@@ -56,7 +56,7 @@ exports.loadAlbum = async function (albumName) {
 exports.listAlbums = async function () {
   const dirs = await getFiles(path.resolve(__dirname, '../public/albums/*'));
   if (dirs === null) {
-    return { error: 'can not read json for', albumName };
+    return { error: 'can not read album list' };
   }
   return {
     albums: dirs.map((path) => {

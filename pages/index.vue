@@ -31,24 +31,11 @@
     </GlobalHeader>
 
     <section class="container py-3">
-      <p class="pb-10">アルバムいちらん</p>
+      <p class="py-3 text-lg">アルバム一覧</p>
 
       <AlbumList :albums="albums" @clickAlbum="onClickAlbum" />
-
-      <div>
-        <o-button size="small" @click="clickMe">Click Me</o-button>
-        <o-button size="small" rounded @click="refetchAlbum"
-          >refetchAlbum</o-button
-        >
-      </div>
     </section>
     <LoadingOverlay :active="s.isImageModalActive" />
-
-    <!-- <FormModal
-      title="アルバム名"
-      :show="s.visibleFormModal"
-      @close="s.visibleFormModal = false"
-    /> -->
   </main>
 </template>
 
@@ -56,9 +43,9 @@
 import * as yup from 'yup';
 import { useNuxtApp } from '#app';
 import type { Album } from '@/types/apptype';
-import { callPost } from '@/util/fetch';
 const pulldown = ref(null);
-const { $router, context } = useNuxtApp();
+const { context } = useNuxtApp();
+const router = useRouter();
 type State = {
   isImageModalActive: boolean;
   visibleFormModal: boolean;
@@ -80,17 +67,9 @@ const { albums, refresh } = useAlbumList();
 //----------------------
 // func
 //----------------------
-const clickMe = () => {
-  s.isImageModalActive = true;
-  setTimeout(() => {
-    s.isImageModalActive = false;
-  }, 1500);
-};
-const refetchAlbum = () => {
-  refresh();
-};
 const onClickAlbum = (album: Album) => {
-  $router.push(`/albums/${album.name}`);
+  // router.push(`/albums/${album.name}/`);
+  location.href = `/albums/${album.name}/`;
 };
 
 const createAlbum = async (e: HTMLButtonElement, val: string) => {
@@ -102,7 +81,7 @@ const createAlbum = async (e: HTMLButtonElement, val: string) => {
     thumbnail: '',
     description: 'せつめいだぞ',
   };
-  const res = await callPost(`/api/albums/${album.name}`, {
+  const res = await saveAlbumDetail(album.name, {
     ...album,
   });
   console.log('res', res);

@@ -115,3 +115,15 @@ $modal-background-background-color: rgba(white, 0.8);
   -moz-box-shadow: none;
   -webkit-box-shadow: none;
 }
+
+.toast-notification {
+  padding: 10px 20px;
+  &.is-top {
+    position: fixed;
+    top: 10px;
+    left: 50%;
+    min-width: 300px;
+    transform: translateX(-50%);
+    box-shadow: 0 0 1px 1px rgba(white, 0.6);
+  }
+}

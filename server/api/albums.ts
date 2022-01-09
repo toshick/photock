@@ -1,17 +1,19 @@
-import type { IncomingMessage, ServerResponse } from 'http';
+import type { IncomingMessage, OutgoingMessage } from 'http';
 import type { Album } from '@/types/apptype';
+
+type Req = IncomingMessage & { originalUrl: string };
 
 /**
  * default
  */
-export default async (req: IncomingMessage, res: ServerResponse) => {
-  const { method, url } = req;
-  console.log('リクエスト', url);
+export default async (req: Req, res: OutgoingMessage) => {
+  const { method } = req;
+  const path = getUrlPath(req);
   switch (method) {
     case 'GET':
-      return getActions(req, res);
+      return getActions(path, req, res);
     case 'POST':
-      return postActions(req, res);
+      return postActions(path, req, res);
     default:
       break;
   }
@@ -20,47 +22,38 @@ export default async (req: IncomingMessage, res: ServerResponse) => {
 /**
  * get
  */
-async function getActions(req: IncomingMessage, _res: ServerResponse) {
-  const albumId = getAlbumIdFromUrl(req);
-  if (albumId) {
-    // album detail
-    const result = await $fetch(`http://localhost:9000/albums/${albumId}`);
-    if (result[albumId]) {
-      return result[albumId] as Album;
-    }
-    return { error: 'can not find album key in response object' };
-  } else {
-    // album list
-    const result = await $fetch('http://localhost:9000/albums');
-    return result as { albums: Album[] };
-  }
+async function getActions(path: string, req: Req, _res: OutgoingMessage) {
+  const result = await $fetch(`http://localhost:9000/${path}`);
+  return result;
 }
 
 /**
  * post
  */
-async function postActions(req: IncomingMessage, _res: ServerResponse) {
-  const params = await parseSendParams(req);
-  if (!params) {
-    return { error: 'can not parse req params' };
-  }
-  const albumId = getAlbumIdFromUrl(req);
-  if (albumId) {
-    const result = await $fetch(`http://localhost:9000/albums/${albumId}`, {
-      method: 'POST',
-      body: {
-        ...params,
-      },
-    });
-    return result as { albums: Album[] };
-  }
-  return null;
+async function postActions(path: string, req: Req, _res: OutgoingMessage) {
+  const body = await parseSendParams(req);
+
+  console.log('そうしんparams', req.headers);
+  const result = await $fetch(`http://localhost:9000/${path}`, {
+    method: 'POST',
+    body,
+    ...req.headers,
+  });
+  return result;
+}
+
+/**
+ * getUrlPath
+ */
+function getUrlPath(req: Req): string {
+  const { originalUrl } = req;
+  return originalUrl.replace('/api/', '');
 }
 
 /**
  * getAlbumIdFromUrl
  */
-function getAlbumIdFromUrl(req: IncomingMessage): string | null {
+function getAlbumIdFromUrl(req: Req): string | null {
   const { url } = req;
   const m = url.match(/\/([^/]+)/);
   return m && m.length === 2 ? m[1] : null;
@@ -69,7 +62,7 @@ function getAlbumIdFromUrl(req: IncomingMessage): string | null {
 /**
  * parseSendParams
  */
-function parseSendParams(req: IncomingMessage): object {
+function parseSendParams(req: Req): object {
   return new Promise((resolve) => {
     let body = '';
     req.on('data', (data) => {
@@ -80,7 +73,7 @@ function parseSendParams(req: IncomingMessage): object {
         const params = JSON.parse(body);
         resolve(params);
       } catch (error) {
-        resolve(null);
+        resolve(body);
       }
     });
   });
