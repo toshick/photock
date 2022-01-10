@@ -1,44 +1,33 @@
 <template>
   <main class>
     <GlobalHeader>
-      <o-button size="small" variant="primary" @click="save">保存</o-button>
+      <o-upload @input="onSelectFiles" multiple>
+        <o-button tag="a" variant="primary" size="small" class="mx-3">
+          <span>アップロード</span>
+        </o-button>
+      </o-upload>
+      <o-button size="small" variant="primary" @click="reset"
+        >リセット</o-button
+      >
     </GlobalHeader>
 
     <section class="container py-6">
-      <p class="pb-10 text-lg">アルバムしょうさい: {{ albumData.name }}</p>
-      <o-button tag="a" variant="primary" @click="refresh">
-        <span>再取得</span>
-      </o-button>
-      <o-button tag="a" variant="primary" @click="save">
-        <span>save</span>
-      </o-button>
+      <p class="pt-10 text-lg">アルバムしょうさい: {{ albumData.name }}</p>
 
-      <div>
+      <!-- <div>
         {{ albumData }}
-      </div>
-      <div>
-        <o-field class="file">
-          <o-upload @input="onSelectFiles" multiple>
-            <o-button tag="a" variant="primary">
-              <span>Click to upload</span>
-            </o-button>
-          </o-upload>
-        </o-field>
-        <ul class="" v-if="filedata.length > 0">
-          <li v-for="f in filedata">
-            <div>
-              <img class="block" :src="f.src" :alt="f.alt" />
-              <o-button
-                tag="a"
-                variant="primary"
-                @click="() => saveImg(f.file)"
-              >
-                <span>画像保存</span>
-              </o-button>
-            </div>
-          </li>
-        </ul>
-      </div>
+      </div> -->
+    </section>
+    <section class="container">
+      <ul class="imglist">
+        <li
+          v-for="i in albumData.items"
+          class="imglist-item"
+          :key="`item-${i.id}`"
+        >
+          <AlbumItem :item="i" @remove="removeItem" @save="saveItem" />
+        </li>
+      </ul>
     </section>
   </main>
 </template>
@@ -46,80 +35,111 @@
 <script setup lang="ts">
 import type { PropType } from 'vue';
 import { useNuxtApp } from '#app';
-import type { Album, FileData } from '@/types/apptype';
+import type { Item } from '@/types/apptype';
 import { createToast } from '@/util/helper';
 
 const oruga = inject('oruga');
 const toast = createToast(oruga);
-
-const files = ref<File[]>([]);
-const filedata = computed(() => {
-  return files.value.map((f: File) => {
-    return { file: f, src: URL.createObjectURL(f), alt: '' };
-  });
-});
 const r = useRoute();
-const { id: albumId } = r.params;
+const albumId = r.params.id as string;
+const { albumData, refresh } = useAlbumDetail(albumId);
 
-const { albumData, refresh } = useAlbumDetail(albumId as string);
-
+/**
+ * onSelectFiles
+ */
 const onSelectFiles = async (e: InputEvent) => {
   const filelist: FileList = (e.target as HTMLInputElement).files;
-  files.value = Array.from(filelist);
+  const files = Array.from(filelist);
+  // upload imgs
+  const reslist = await Promise.all(
+    files.map((f, index) => {
+      return saveAlbumImage(albumId, f, index);
+    }),
+  );
+  const ok = reslist.every((res) => res.imgSaved === true);
+  if (!ok) {
+    toast.ng('アップロードに失敗したケロ');
+  }
+  toast.ok('アップロードしたケロ');
+  await refresh();
+  await save(false);
 };
 
-const save = async () => {
-  console.log('files', { ...files.value });
+/**
+ * save
+ */
+const save = async (withToast: boolean = true) => {
   const res = await saveAlbumDetail(albumId, {
     ...albumData.value,
-    hoge: {
-      yyyy: 444,
-    },
   });
   if (res.error) {
-    toast.error(`❗️アルバム情報保存エラー ${res.error}`);
+    toast.ng(`❗️アルバム情報保存エラー ${res.error}`);
+    return;
+  }
+  if (withToast) {
+    toast.ok('保存したケロ');
+  }
+  refresh();
+};
+
+/**
+ * removeItem
+ */
+const removeItem = async (item: Item) => {
+  const res = await removeAlbumImage(albumId, item.id);
+  if (res.error) {
+    toast.ng(`❗️画像削除エラー ${res.error}`);
+    return;
+  }
+  toast.ok('削除したケロ');
+  refresh();
+};
+
+/**
+ * saveItem
+ */
+const saveItem = async (item: Item) => {
+  const items = albumData.value.items.map((i) => {
+    if (i.id === item.id) return item;
+    return i;
+  });
+  const res = await saveAlbumDetail(albumId, {
+    ...albumData.value,
+    items,
+  });
+  if (res.error) {
+    toast.ng(`❗️アイテム情報保存エラー ${res.error}`);
     return;
   }
   toast.ok('保存したケロ');
   refresh();
 };
 
-const saveImg = async (file: File) => {
-  const res = await saveAlbumImage(albumId, file);
-  console.log('がぞうほぞん', res);
+/**
+ * reset
+ */
+const reset = async () => {
+  const res = await resetAlbumImage(albumId);
   if (res.error) {
-    toast.error(`❗️画像保存エラー ${res.error}`);
+    toast.ng(`❗️リセットエラー ${res.error}`);
     return;
   }
-  toast.ok('保存したケロ');
+  toast.ok('リセットしたケロ');
+  refresh();
 };
-
-const nyao = async () => {
-  const res = await testGet(albumId, { nnnn: 5555 });
-  console.log('nyaoけっか', res);
-};
-
-// watch(rr.currentRoute.value, () => {
-//   console.log('ぱすへんこう', rr.currentRoute.value);
-// });
-
-// watchEffect(() => {
-//   const { id: albumId } = r.params;
-//   console.log('albumId', albumId, r.path);
-//   if (!albumId) return;
-
-//   const { albumData: data } = useAlbumDetail(albumId as string);
-//   album.albumData = data;
-// });
-
-// onMounted(() => {
-//   const r = useRoute();
-//   const myid = r.params.id;
-//   console.log('idちぇっく', myid);
-//   id.value = myid as string;
-// });
 
 //----------------------
 // use
 //----------------------
 </script>
+
+<style scoped lang="scss">
+.imglist {
+  display: flex;
+  flex-wrap: wrap;
+}
+.imglist-item {
+  // width: 50%;
+  margin: 0px 15px 30px 0;
+}
+</style>

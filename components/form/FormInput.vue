@@ -8,6 +8,7 @@
       icon-clickable
       @icon-click="onIconClick"
       :expanded="expanded"
+      :type="inputType"
     />
     <slot name="right" :meta="meta" :val="myval" />
   </o-field>
@@ -50,6 +51,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  textarea: {
+    type: Boolean,
+    default: false,
+  },
   yup: {
     type: Object as PropType<yup.AnySchema>,
     default: null,
@@ -65,6 +70,7 @@ const onIconClick = () => {
     context.emit('icon');
   }
 };
+const inputType = computed(() => (props.textarea ? 'textarea' : 'text'));
 
 // Create a form context with the validation schema
 useForm({

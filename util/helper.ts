@@ -1,3 +1,5 @@
+export const BACKEND_URL = 'http://localhost:9000';
+
 export const readFile = (file: File) => {
   return new Promise((resolve) => {
     const reader = new FileReader();
@@ -23,7 +25,7 @@ export const createToast = (oruga) => {
         duration: 3000,
       });
     },
-    error: (msg: string) => {
+    ng: (msg: string) => {
       oruga.notification.open({
         message: msg,
         rootClass: 'toast-notification',
@@ -34,3 +36,5 @@ export const createToast = (oruga) => {
     },
   };
 };
+
+export const pad = (num: number, len: number) => String(num).padStart(len, '0');

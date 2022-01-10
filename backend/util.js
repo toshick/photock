@@ -2,6 +2,7 @@ const path = require('path');
 const fs = require('fs-extra');
 const glob = require('glob');
 const JSON_FILE_NAME = 'data.json';
+const initialData = { items: [], description: '' };
 
 /**
  * getFiles
@@ -13,10 +14,30 @@ exports.getFiles = (path) => {
         resolve(null);
         return;
       }
-
       resolve(files);
     });
   });
+};
+
+/**
+ * removeFiles
+ */
+exports.removeFiles = (paths) => {
+  return Promise.all(
+    paths.map(async (path) => {
+      const exist = await fs.pathExists(path);
+      if (!exist) {
+        throw new Error(`file not exitst: ${path}`);
+      }
+      return fs.remove(path);
+    }),
+  )
+    .then(() => {
+      return { ok: true };
+    })
+    .catch((err) => {
+      return { error: err.message };
+    });
 };
 
 /**
@@ -37,31 +58,44 @@ exports.saveJson = (path, data) => {
 /**
  * saveAlbumJson
  */
-exports.saveAlbumJson = (albumName, data) => {
-  const dir = path.resolve(__dirname, '../public/albums', albumName);
+exports.saveAlbumJson = (albumId, data) => {
+  const dir = path.join(__dirname, '../public/albums', albumId);
   try {
     fs.ensureDirSync(dir);
   } catch (error) {
     return false;
   }
 
-  return exports.saveJson(path.resolve(dir, JSON_FILE_NAME), data);
+  return exports.saveJson(path.join(dir, JSON_FILE_NAME), data);
 };
 
 /**
  * loadAlbumJson
  */
-exports.loadAlbumJson = (albumName) => {
-  const filepath = path.resolve(
+exports.loadAlbumJson = async (albumId) => {
+  const filepath = path.join(
     __dirname,
     '../public/albums',
-    albumName,
+    albumId,
     JSON_FILE_NAME,
   );
+
+  const exist = await fs.pathExists(filepath);
+  if (!exist) {
+    await exports.saveAlbumJson(albumId, initialData);
+  }
   try {
     const data = fs.readJsonSync(filepath);
     return data;
   } catch (error) {
     return null;
   }
+};
+
+/**
+ * getAlbumImgs
+ */
+exports.getAlbumImgs = (albumId) => {
+  const filepath = path.join(__dirname, '../public/albums', albumId, 'img/*');
+  return exports.getFiles(filepath);
 };

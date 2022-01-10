@@ -14,3 +14,8 @@ export type FileData = {
   src: string;
   alt: string;
 };
+
+export type AlbumItem = {
+  id: string;
+  img: string;
+};

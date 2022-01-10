@@ -1,5 +1,5 @@
 import type { IncomingMessage, OutgoingMessage } from 'http';
-import type { Album } from '@/types/apptype';
+import config from '#config';
 
 type Req = IncomingMessage & { originalUrl: string };
 
@@ -23,7 +23,7 @@ export default async (req: Req, res: OutgoingMessage) => {
  * get
  */
 async function getActions(path: string, req: Req, _res: OutgoingMessage) {
-  const result = await $fetch(`http://localhost:9000/${path}`);
+  const result = await $fetch(`${config.backendURL}/${path}`);
   return result;
 }
 
@@ -32,12 +32,10 @@ async function getActions(path: string, req: Req, _res: OutgoingMessage) {
  */
 async function postActions(path: string, req: Req, _res: OutgoingMessage) {
   const body = await parseSendParams(req);
-
-  console.log('そうしんparams', req.headers);
-  const result = await $fetch(`http://localhost:9000/${path}`, {
+  // console.log('そうしんparams', req.headers);
+  const result = await $fetch(`${config.backendURL}/${path}`, {
     method: 'POST',
     body,
-    ...req.headers,
   });
   return result;
 }

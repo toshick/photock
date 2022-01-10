@@ -1,4 +1,5 @@
 import type { AppState } from '@/types/apptype';
+import { pad } from '@/util/helper';
 
 const usePost = (url: string, body: any) => {
   return useFetch(url, {
@@ -61,10 +62,16 @@ export const saveAlbumDetail = async (albumId: string, albumData: object) => {
 /**
  * saveAlbumImage
  */
-export const saveAlbumImage = async (albumId: string, file: File) => {
+export const saveAlbumImage = async (
+  albumId: string,
+  file: File,
+  index: number,
+) => {
+  const timestamp = new Date().getTime();
+  const config = useRuntimeConfig();
   const formData = new FormData();
-  formData.append('myimg', file, file.name);
-  const url = `http://localhost:9000/albums/${albumId}/image`;
+  formData.append('myimg', file, `${timestamp}-${pad(index, 2)}-${file.name}`);
+  const url = `${config.backendURL}/albums/${albumId}/image`;
   const response = await fetch(url, {
     method: 'POST',
     body: formData,
@@ -73,15 +80,40 @@ export const saveAlbumImage = async (albumId: string, file: File) => {
 };
 
 /**
+ * removeAlbumImage
+ */
+export const removeAlbumImage = async (albumId: string, imgId: string) => {
+  const config = useRuntimeConfig();
+  const url = `${config.backendURL}/albums/${albumId}/image/${imgId}`;
+  const response = await fetch(url, {
+    method: 'DELETE',
+  });
+  return await response.json();
+};
+
+/**
+ * resetAlbumImage
+ */
+export const resetAlbumImage = async (albumId: string) => {
+  const config = useRuntimeConfig();
+  const url = `${config.backendURL}/albums/${albumId}/reset/`;
+  const response = await fetch(url, {
+    method: 'DELETE',
+  });
+  return await response.json();
+};
+
+/**
  * useAlbumDetail
  */
 export const useAlbumDetail = (albumId: string) => {
+  const config = useRuntimeConfig();
   const { data, pending, refresh, error } = useGetLazy(
-    `/api/albums/${albumId}`,
+    `${config.backendURL}/albums/${albumId}`,
   );
   const albumData = computed(() => {
     const ret = data?.value;
-    return ret[albumId] || null;
+    return ret;
   });
 
   return { albumData, refresh };
@@ -91,8 +123,9 @@ export const useAlbumDetail = (albumId: string) => {
  * testGet
  */
 export const testGet = async (albumId: string, d: object) => {
+  const config = useRuntimeConfig();
   const { data, pending, refresh, error } = await usePost(
-    `/api/albums/${albumId}/nyao/myao`,
+    `${config.backendURL}/albums/${albumId}/nyao/myao`,
     {
       ...d,
     },
