@@ -1,5 +1,5 @@
 <template>
-  <article class="imgitem">
+  <article class="imgitem" :class="props.class">
     <div>
       <FormInput
         name="title"
@@ -7,7 +7,9 @@
         class="py-3 w-300px"
         size="small"
         :yup="$vali.yup(yup.string(), $vali.max(40))"
+        :val="form.title"
         expanded
+        @input="(val:string) => (form.title = val)"
       >
       </FormInput>
     </div>
@@ -25,7 +27,14 @@
       <o-button
         tag="a"
         variant="info"
-        @click="() => $emit('save', { ...item })"
+        @click="
+          () =>
+            $emit('save', {
+              ...item,
+              title: form.title,
+              description: form.description,
+            })
+        "
         size="small"
         class="imgitem-save"
       >
@@ -39,13 +48,12 @@
         placeholder="せつめい"
         class="py-1 w-full"
         size="small"
-        v-model="description"
         :yup="$vali.yup(yup.string())"
-        :initialValue="'ううう'"
+        :val="form.description"
         expanded
+        @input="(val:string) => (form.description = val)"
       >
       </FormInput>
-      description: {{ description }}
     </div>
   </article>
 </template>
@@ -55,13 +63,20 @@ import type { PropType } from 'vue';
 import type { AlbumItem } from '@/types/apptype';
 import * as yup from 'yup';
 const props = defineProps({
+  class: {
+    type: String,
+    default: '',
+  },
   item: {
     type: Object as PropType<AlbumItem>,
     default: () => {},
   },
 });
 
-const description = ref('');
+const form = reactive({
+  title: props.item.title || '',
+  description: props.item.description || '',
+});
 
 const item = computed(() => props.item);
 </script>

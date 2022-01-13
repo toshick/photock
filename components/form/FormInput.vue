@@ -1,5 +1,5 @@
 <template>
-  <o-field :message="errorMessage" :label="label">
+  <o-field :message="errorMessage" :label="label" :class="props.class">
     <o-input
       v-model="myval"
       :placeholder="placeholder"
@@ -9,23 +9,28 @@
       @icon-click="onIconClick"
       :expanded="expanded"
       :type="inputType"
+      @input="$emit('input', myval)"
     />
     <slot name="right" :meta="meta" :val="myval" />
   </o-field>
 </template>
 
-<script setup lang="ts">
-import i18next from 'i18next';
+<script setup lang="ts" emits="['input']">
 import type { PropType } from 'vue';
-import { computed, ref } from 'vue';
+import { computed } from 'vue';
 import { useForm, useField } from 'vee-validate';
 import * as yup from 'yup';
-const { context } = useNuxtApp();
-// const MY_VARIANTS = ['required'];
+// const emit = defineEmits<(name: string, val?: any) => any>();
+const emit = defineEmits(['input', 'icon']);
+
 const props = defineProps({
   name: {
     type: String,
     required: true,
+  },
+  class: {
+    type: String,
+    default: '',
   },
   placeholder: {
     type: String,
@@ -39,7 +44,7 @@ const props = defineProps({
     type: String,
     default: '',
   },
-  initialValue: {
+  val: {
     type: String,
     default: '',
   },
@@ -60,31 +65,32 @@ const props = defineProps({
     default: null,
   },
 });
+const inputType = computed(() => (props.textarea ? 'textarea' : 'text'));
+const myPropVal = computed(() => props.val);
 const schema = computed(() => {
   return yup.object({
     [props.name]: props.yup,
   });
 });
-const onIconClick = () => {
-  if (props.icon) {
-    context.emit('icon');
-  }
-};
-const inputType = computed(() => (props.textarea ? 'textarea' : 'text'));
-
-// Create a form context with the validation schema
 useForm({
   validationSchema: schema,
 });
-onMounted(() => {});
 
-const {
-  value: myval,
-  errorMessage,
-  meta,
-} = useField(props.name, undefined, {
-  initialValue: props.initialValue,
+const { value: myval, errorMessage, meta } = useField(props.name);
+watch(myPropVal, () => {
+  if (myPropVal.value !== myval.value) {
+    myval.value = props.val;
+  }
 });
+
+onMounted(() => {
+  myval.value = myPropVal.value;
+});
+const onIconClick = () => {
+  if (props.icon) {
+    emit('icon');
+  }
+};
 </script>
 
 <style lang="scss">

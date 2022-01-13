@@ -35,7 +35,7 @@
 
       <AlbumList :albums="albums" @clickAlbum="onClickAlbum" />
     </section>
-    <LoadingOverlay :active="s.isImageModalActive" />
+    <!-- <LoadingOverlay :active="s.isImageModalActive" /> -->
   </main>
 </template>
 
@@ -44,20 +44,16 @@ import * as yup from 'yup';
 import { useNuxtApp } from '#app';
 import type { Album } from '@/types/apptype';
 const pulldown = ref(null);
-const { context } = useNuxtApp();
-const router = useRouter();
-type State = {
-  isImageModalActive: boolean;
-  visibleFormModal: boolean;
-};
+// const { context } = useNuxtApp();
+// const router = useRouter();
 
 //----------------------
 // state
 //----------------------
-const s = reactive<State>({
-  isImageModalActive: false,
-  visibleFormModal: false,
-});
+// const s = reactive<State>({
+//   isImageModalActive: false,
+//   visibleFormModal: false,
+// });
 
 //----------------------
 // use

@@ -18,4 +18,6 @@ export type FileData = {
 export type AlbumItem = {
   id: string;
   img: string;
+  title: string;
+  description: string;
 };
