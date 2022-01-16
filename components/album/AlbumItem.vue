@@ -1,10 +1,15 @@
 <template>
-  <article class="imgitem" :class="props.class">
-    <div>
+  <article class="imgitem" :class="myClass">
+    <!-- ヘッダ -->
+    <header class="imgitem-header">
+      <span class="handle pr-4">
+        {{ index }}
+        <i class="fas fa-bars"></i>
+      </span>
       <FormInput
         name="title"
         placeholder="タイトル（40文字以下）"
-        class="py-3 w-300px"
+        class="block"
         size="small"
         :yup="$vali.yup(yup.string(), $vali.max(40))"
         :val="form.title"
@@ -12,41 +17,61 @@
         @input="(val:string) => (form.title = val)"
       >
       </FormInput>
-    </div>
-    <figure class="imgitem-img">
-      <img :src="item.img" alt="" />
-      <o-button
-        tag="a"
-        variant="primary"
-        @click="() => $emit('remove', { ...item })"
-        size="small"
-        class="imgitem-remove"
-      >
-        <span>remove</span>
-      </o-button>
-      <o-button
-        tag="a"
-        variant="info"
-        @click="
-          () =>
-            $emit('save', {
-              ...item,
-              title: form.title,
-              description: form.description,
-            })
-        "
-        size="small"
-        class="imgitem-save"
-      >
-        <span>save</span>
-      </o-button>
-    </figure>
-    <div>
+    </header>
+    <!-- イメージ -->
+    <div class="imgitem-img">
+      <figure class="imgitem-imgholder">
+        <img :src="item.img" alt="" />
+        <!-- 右側 -->
+        <nav class="imgitem-ui imgitem-ui-r">
+          <!-- 保存ボタン -->
+          <a
+            v-if="editted"
+            class="btn-save iconbutton"
+            @click="
+              () =>
+                $emit('save', {
+                  ...item,
+                  title: form.title,
+                  description: form.description,
+                })
+            "
+            ><i class="fas fa-arrow-up"></i
+          ></a>
+        </nav>
+        <nav class="imgitem-ui imgitem-ui-b">
+          <!-- もどすボタン -->
+          <a v-if="editted" class="btn-revert iconbutton" @click="revert"
+            ><i class="fas fa-undo"></i
+          ></a>
+        </nav>
+        <!-- 左側 -->
+        <nav class="imgitem-ui imgitem-ui-l">
+          <!-- 削除ボタン -->
+          <a class="btn-remove iconbutton" @click="state.removing = true"
+            ><i class="far fa-trash-alt"></i
+          ></a>
+        </nav>
+      </figure>
+      <!-- 削除確認 -->
+      <div class="imgitem-img-confirm-remove" v-if="state.removing">
+        <div>
+          <a
+            class="btn-confirm-save"
+            @click="() => $emit('remove', { ...item })"
+            ><i class="far fa-trash-alt"></i>削除</a
+          >
+          <a class="btn-confirm-cancel" @click="state.removing = false"
+            >キャンセル</a
+          >
+        </div>
+      </div>
+      <!-- description -->
       <FormInput
         textarea
         name="description"
         placeholder="せつめい"
-        class="py-1 w-full"
+        class="w-full imgitem-description"
         size="small"
         :yup="$vali.yup(yup.string())"
         :val="form.description"
@@ -54,6 +79,15 @@
         @input="(val:string) => (form.description = val)"
       >
       </FormInput>
+      <!-- Saved -->
+      <transition name="fade">
+        <div v-if="saved" class="imgitem-img-saved">
+          <span>
+            <i class="fas fa-check"></i>
+            Saved</span
+          >
+        </div>
+      </transition>
     </div>
   </article>
 </template>
@@ -62,7 +96,13 @@
 import type { PropType } from 'vue';
 import type { AlbumItem } from '@/types/apptype';
 import * as yup from 'yup';
+import { zeropad } from '@/util/helper';
+
 const props = defineProps({
+  index: {
+    type: Number,
+    default: 0,
+  },
   class: {
     type: String,
     default: '',
@@ -71,48 +111,165 @@ const props = defineProps({
     type: Object as PropType<AlbumItem>,
     default: () => {},
   },
+  saved: {
+    type: Boolean,
+    default: false,
+  },
 });
 
+const state = reactive({
+  removing: false,
+});
 const form = reactive({
   title: props.item.title || '',
   description: props.item.description || '',
 });
 
+const index = computed(() => zeropad(props.index || 0, 3));
 const item = computed(() => props.item);
+const saved = ref(false);
+const editted = computed(() => {
+  const formTitle = form.title || '';
+  const propTitle = props.item.title || '';
+  const formDescription = form.description || '';
+  const propDescription = props.item.description || '';
+  return formTitle !== propTitle || formDescription !== propDescription;
+});
+const myClass = computed(() => {
+  return { '-editted': editted.value, [props.class]: true };
+});
+const revert = () => {
+  form.title = props.item.title;
+  form.description = props.item.description;
+};
+
+watch(
+  () => props.saved,
+  () => {
+    saved.value = props.saved;
+  },
+);
 </script>
 
 <style scoped lang="scss">
 .imgitem {
+  --oruga-tooltip-color: red;
   position: relative;
-
-  &-img {
-    display: inline-block;
-    position: relative;
-    &:hover {
-      .imgitem-remove,
-      .imgitem-save {
+  &:hover {
+    .imgitem-ui {
+      & > a {
         display: block;
       }
     }
   }
-  &-remove {
-    display: none;
+  &-header {
+    display: flex;
+    align-items: center;
+    padding-bottom: 10px;
+    .handle {
+      cursor: pointer;
+    }
+    & > .field {
+      flex: 1 0 auto;
+      border-radius: 4px;
+    }
+  }
+  .btn-save,
+  .btn-revert {
+    display: block;
+    color: var(--primary-color);
+  }
+  &-ui {
+    & > a {
+      display: none;
+      color: #666;
+      margin-bottom: 15px;
+
+      &:hover {
+        color: #888;
+      }
+      &::after {
+        box-shadow: 0 0 2px 1px rgba(0, 0, 0, 0.4);
+      }
+    }
+  }
+  &-ui-l {
+    position: absolute;
+    top: 10px;
+    left: 14px;
+  }
+  &-ui-r {
+    position: absolute;
+    top: 10px;
+    right: 14px;
+  }
+  &-ui-b {
+    position: absolute;
+    bottom: 0px;
+    right: 14px;
+  }
+  &-imgholder {
+    position: relative;
+    z-index: 1;
+    max-width: 310px;
+
+    img {
+      display: block;
+      width: 100%;
+      max-height: 400px;
+      border-radius: 4px 4px 0 0;
+      object-fit: contain;
+    }
+  }
+  &-img-confirm-remove {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     position: absolute;
     top: 0;
-    right: 0;
-    z-index: 1;
+    left: 0;
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(white, 0.9);
+    a {
+      display: inline-block;
+      margin: 0 10px;
+      color: #333;
+      text-shadow: 0 2px 2px white;
+      &:hover {
+        color: #888;
+      }
+    }
+    i {
+      margin-right: 0.3em;
+    }
   }
-  &-save {
-    display: none;
+  &-img-saved {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     position: absolute;
-    bottom: 0;
-    right: 0;
-    z-index: 1;
+    top: 0;
+    left: 0;
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(white, 0.9);
+    span {
+      color: var(--primary-color);
+      font-size: 30px;
+      font-weight: bold;
+    }
   }
-  img {
-    display: block;
-    max-width: 320px;
-    max-height: 400px;
+}
+</style>
+
+<style lang="scss">
+.imgitem-description {
+  .input {
+    border-radius: 0 0 4px 4px;
+    border-top: 0;
   }
 }
 </style>

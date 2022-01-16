@@ -1,5 +1,5 @@
 import type { AppState } from '@/types/apptype';
-import { pad } from '@/util/helper';
+import { zeropad } from '@/util/helper';
 
 const usePost = (url: string, body: any) => {
   return useFetch(url, {
@@ -70,7 +70,11 @@ export const saveAlbumImage = async (
   const timestamp = new Date().getTime();
   const config = useRuntimeConfig();
   const formData = new FormData();
-  formData.append('myimg', file, `${timestamp}-${pad(index, 2)}-${file.name}`);
+  formData.append(
+    'myimg',
+    file,
+    `${timestamp}-${zeropad(index, 2)}-${file.name}`,
+  );
   const url = `${config.backendURL}/albums/${albumId}/image`;
   const response = await fetch(url, {
     method: 'POST',
@@ -106,13 +110,16 @@ export const resetAlbumImage = async (albumId: string) => {
 /**
  * useAlbumDetail
  */
-export const useAlbumDetail = (albumId: string) => {
+export const useAlbumDetail = async (albumId: string) => {
   const config = useRuntimeConfig();
-  const { data, pending, refresh, error } = useGetLazy(
+  const { data, pending, refresh, error } = await useGet(
     `${config.backendURL}/albums/${albumId}`,
   );
   const albumData = computed(() => {
-    const ret = data?.value;
+    const ret = { ...data?.value } as any;
+    if (!ret.items) {
+      ret.items = [];
+    }
     return ret;
   });
 

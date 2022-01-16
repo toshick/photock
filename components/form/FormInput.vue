@@ -9,7 +9,6 @@
       @icon-click="onIconClick"
       :expanded="expanded"
       :type="inputType"
-      @input="$emit('input', myval)"
     />
     <slot name="right" :meta="meta" :val="myval" />
   </o-field>
@@ -83,6 +82,10 @@ watch(myPropVal, () => {
   }
 });
 
+watch(myval, () => {
+  emit('input', myval.value);
+});
+
 onMounted(() => {
   myval.value = myPropVal.value;
 });
@@ -102,5 +105,9 @@ const onIconClick = () => {
 }
 .help {
   color: var(--danger-color);
+}
+.input {
+  background-color: rgba(#e7796a, 0.1);
+  border-color: rgba(#e7796a, 0.6);
 }
 </style>

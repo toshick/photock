@@ -37,4 +37,32 @@ export const createToast = (oruga) => {
   };
 };
 
-export const pad = (num: number, len: number) => String(num).padStart(len, '0');
+export const zeropad = (num: number, len: number) =>
+  String(num).padStart(len, '0');
+
+/**
+ * shuffle
+ */
+export function shuffle(array: Array<any>): Array<any> {
+  const ret: Array<any> = array.concat();
+  for (let i = ret.length - 1; i > 0; i -= 1) {
+    const r = Math.floor(Math.random() * (i + 1));
+    const tmp = ret[i];
+    ret[i] = ret[r];
+    ret[r] = tmp;
+  }
+  return ret;
+}
+
+/**
+ * asort
+ */
+export function asort(ary: Array<any>, key: string = 'id') {
+  return ary.sort((a, b) => {
+    const A = zeropad(a[key], 5);
+    const B = zeropad(b[key], 5);
+    if (A < B) return -1;
+    if (A > B) return 1;
+    return 0;
+  });
+}

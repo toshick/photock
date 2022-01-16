@@ -17,6 +17,9 @@
 header {
   background-color: var(--primary-color);
   background-image: url('/img/60-lines.png');
+  position: sticky;
+  top: 0;
+  z-index: 5;
 }
 h1 {
   a {
