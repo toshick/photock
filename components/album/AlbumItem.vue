@@ -18,67 +18,77 @@
       >
       </FormInput>
     </header>
-    <!-- イメージ -->
-    <div class="imgitem-img">
-      <figure class="imgitem-imgholder">
-        <img :src="item.img" alt="" />
-        <!-- 右側 -->
-        <nav class="imgitem-ui imgitem-ui-r">
-          <!-- 保存ボタン -->
-          <a
-            v-if="editted"
-            class="btn-save iconbutton"
-            @click="
-              () =>
-                $emit('save', {
-                  ...item,
-                  title: form.title,
-                  description: form.description,
-                })
-            "
-            ><i class="fas fa-arrow-up"></i
-          ></a>
-        </nav>
-        <nav class="imgitem-ui imgitem-ui-b">
-          <!-- もどすボタン -->
-          <a v-if="editted" class="btn-revert iconbutton" @click="revert"
-            ><i class="fas fa-undo"></i
-          ></a>
-        </nav>
-        <!-- 左側 -->
-        <nav class="imgitem-ui imgitem-ui-l">
-          <!-- 削除ボタン -->
-          <a class="btn-remove iconbutton" @click="state.removing = true"
-            ><i class="far fa-trash-alt"></i
-          ></a>
-        </nav>
-      </figure>
-      <!-- 削除確認 -->
-      <div class="imgitem-img-confirm-remove" v-if="state.removing">
-        <div>
-          <a
-            class="btn-confirm-save"
-            @click="() => $emit('remove', { ...item })"
-            ><i class="far fa-trash-alt"></i>削除</a
-          >
-          <a class="btn-confirm-cancel" @click="state.removing = false"
-            >キャンセル</a
-          >
+    <div class="imgitem-body">
+      <!-- イメージ -->
+      <div class="imgitem-img">
+        <figure class="imgitem-imgholder">
+          <img :src="item.img" alt="" lazy />
+          <!-- 右側 -->
+          <nav class="imgitem-ui imgitem-ui-r">
+            <!-- 保存ボタン -->
+            <a
+              v-if="editted"
+              class="btn-save iconbutton"
+              @click="
+                () =>
+                  $emit('save', {
+                    ...item,
+                    title: form.title,
+                    description: form.description,
+                  })
+              "
+              ><i class="fas fa-arrow-up"></i
+            ></a>
+          </nav>
+          <nav class="imgitem-ui imgitem-ui-b">
+            <!-- もどすボタン -->
+            <a v-if="editted" class="btn-revert iconbutton" @click="revert"
+              ><i class="fas fa-undo"></i
+            ></a>
+          </nav>
+          <!-- 左側 -->
+          <nav class="imgitem-ui imgitem-ui-l">
+            <!-- 削除ボタン -->
+            <a class="btn-remove iconbutton" @click="state.removing = true"
+              ><i class="far fa-trash-alt"></i
+            ></a>
+            <!-- 削除ボタン -->
+            <a class="btn-remove iconbutton" @click="$emit('move-top')"
+              ><i class="fas fa-arrow-up"></i
+            ></a>
+            <!-- 削除ボタン -->
+            <a class="btn-remove iconbutton" @click="$emit('move-bottom')"
+              ><i class="fas fa-arrow-down"></i
+            ></a>
+          </nav>
+        </figure>
+        <!-- 削除確認 -->
+        <div class="imgitem-img-confirm-remove" v-if="state.removing">
+          <div>
+            <a
+              class="btn-confirm-save"
+              @click="() => $emit('remove', { ...item })"
+              ><i class="far fa-trash-alt"></i>削除</a
+            >
+            <a class="btn-confirm-cancel" @click="state.removing = false"
+              >キャンセル</a
+            >
+          </div>
         </div>
+        <!-- description -->
+        <FormInput
+          textarea
+          name="description"
+          placeholder="せつめい"
+          class="w-full imgitem-description"
+          size="small"
+          :yup="$vali.yup(yup.string())"
+          :val="form.description"
+          expanded
+          @input="(val:string) => (form.description = val)"
+        >
+        </FormInput>
       </div>
-      <!-- description -->
-      <FormInput
-        textarea
-        name="description"
-        placeholder="せつめい"
-        class="w-full imgitem-description"
-        size="small"
-        :yup="$vali.yup(yup.string())"
-        :val="form.description"
-        expanded
-        @input="(val:string) => (form.description = val)"
-      >
-      </FormInput>
       <!-- Saved -->
       <transition name="fade">
         <div v-if="saved" class="imgitem-img-saved">
@@ -155,6 +165,7 @@ watch(
 .imgitem {
   --oruga-tooltip-color: red;
   position: relative;
+
   &:hover {
     .imgitem-ui {
       & > a {
@@ -173,6 +184,12 @@ watch(
       flex: 1 0 auto;
       border-radius: 4px;
     }
+  }
+  &-body {
+    border-radius: 4px;
+    overflow: hidden;
+    background-color: white;
+    box-shadow: 0 2px 3px 1px rgba(#000, 0.13);
   }
   .btn-save,
   .btn-revert {
@@ -211,14 +228,12 @@ watch(
   &-imgholder {
     position: relative;
     z-index: 1;
-    max-width: 310px;
 
     img {
       display: block;
-      width: 100%;
-      max-height: 400px;
-      border-radius: 4px 4px 0 0;
-      object-fit: contain;
+      width: 320px;
+      height: 200px;
+      object-fit: cover;
     }
   }
   &-img-confirm-remove {
@@ -255,7 +270,7 @@ watch(
     z-index: 2;
     width: 100%;
     height: 100%;
-    background-color: rgba(white, 0.9);
+    background-color: rgba(white, 0.95);
     span {
       color: var(--primary-color);
       font-size: 30px;

@@ -1,3 +1,4 @@
+const fs = require('fs-extra');
 const uuid = require('uuid');
 const path = require('path');
 const {
@@ -43,6 +44,44 @@ exports.saveAlbum = async function (albumId, body) {
 };
 
 /**
+ * changeAlbumId
+ */
+exports.changeAlbumId = async function (albumId, body) {
+  if (!albumId) {
+    return { error: 'albumId is not provided' };
+  }
+  const currentData = await exports.loadAlbum(albumId);
+  if (currentData.error) {
+    return currentData.error;
+  }
+
+  const { newId } = body;
+  if (!newId) {
+    return { error: 'target albumId is not provided' };
+  }
+  if (albumId === newId) {
+    return { error: 'name is the same' };
+  }
+  const from = path.resolve(__dirname, `../public/albums/${albumId}`);
+  const to = path.resolve(__dirname, `../public/albums/${newId}`);
+  try {
+    fs.moveSync(from, to);
+  } catch (error) {
+    return { error: error.message };
+  }
+  // copy files
+  let json = JSON.stringify(currentData);
+  const regex = new RegExp(`/albums/${albumId}/`, 'g');
+  json = json.replace(regex, `/albums/${newId}/`);
+  const data2 = await exports.saveAlbum(newId, JSON.parse(json));
+  if (data2.error) {
+    return data2.error;
+  }
+
+  return { renamed: true, newId };
+};
+
+/**
  * loadAlbum
  */
 exports.loadAlbum = async function (albumId) {
@@ -58,7 +97,9 @@ exports.loadAlbum = async function (albumId) {
   const imgs = (await getAlbumImgs(albumId)) || [];
   imgs.forEach((path) => {
     const imgpath = path.replace(/^.+public/, '');
-    const find = items.find((i) => i.img === imgpath);
+    const find = items.find((i) => {
+      return i.img === imgpath;
+    });
     if (!find) {
       items.push({ img: imgpath, id: uuid.v4() });
     }
@@ -109,9 +150,9 @@ exports.removeAlbumItem = async function (albumId, itemId) {
 };
 
 /**
- * resetAlbumItem
+ * resetAlbum
  */
-exports.resetAlbumItem = async function (albumId) {
+exports.resetAlbum = async function (albumId) {
   const imgs = await getFiles(
     path.join(__dirname, `../public/albums/${albumId}/*`),
   );
@@ -122,6 +163,25 @@ exports.resetAlbumItem = async function (albumId) {
   if (resultRemove.error) {
     return resultRemove;
   }
+
+  const res = await exports.saveAlbum(albumId, {});
+  if (res.error) {
+    return res.error;
+  }
+
+  return { ok: true };
+};
+
+/**
+ * deleteAlbum
+ */
+exports.deleteAlbum = async function (albumId) {
+  const target = path.join(__dirname, `../public/albums/${albumId}`);
+  const resultRemove = await removeFiles([target]);
+  if (resultRemove.error) {
+    return resultRemove;
+  }
+
   return { ok: true };
 };
 

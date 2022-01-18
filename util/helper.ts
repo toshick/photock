@@ -37,7 +37,7 @@ export const createToast = (oruga) => {
   };
 };
 
-export const zeropad = (num: number, len: number) =>
+export const zeropad = (num: number | string, len: number) =>
   String(num).padStart(len, '0');
 
 /**

@@ -98,7 +98,8 @@ const onIconClick = () => {
 
 <style lang="scss">
 .field {
-  display: inline-block;
+  // display: inline-block;
+  // margin: 0;
   & > .label {
     font-weight: normal;
   }
@@ -107,7 +108,13 @@ const onIconClick = () => {
   color: var(--danger-color);
 }
 .input {
-  background-color: rgba(#e7796a, 0.1);
-  border-color: rgba(#e7796a, 0.6);
+  background-color: #fae9e8;
+  // border-color: rgba(#e7796a, 0.6);
+  border: none;
+  border: solid 1px #fff;
+
+  &:hover {
+    border: solid 1px #fff;
+  }
 }
 </style>

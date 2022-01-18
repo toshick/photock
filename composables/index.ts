@@ -15,6 +15,13 @@ const useGet = (url: string, params: any = null) => {
   });
 };
 
+const useDelete = (url: string, params: any = null) => {
+  return useFetch(url, {
+    method: 'DELETE',
+    params,
+  });
+};
+
 const useGetLazy = (url: string, params: any = null) => {
   return useFetch(url, {
     method: 'GET',
@@ -54,9 +61,20 @@ export const saveAlbumDetail = async (albumId: string, albumData: object) => {
       ...albumData,
     },
   );
-  const result = data?.value ? { ...data?.value } : { error: true };
 
-  return result;
+  return { ...data?.value };
+};
+
+/**
+ * deleteAlbum
+ */
+export const deleteAlbum = async (albumId: string) => {
+  const config = useRuntimeConfig();
+  const { data, pending, refresh, error } = await useDelete(
+    `${config.backendURL}/albums/${albumId}/detail`,
+  );
+
+  return { ...data?.value };
 };
 
 /**
@@ -84,15 +102,23 @@ export const saveAlbumImage = async (
 };
 
 /**
+ * changeAlbumId
+ */
+export const changeAlbumId = async (albumId: string, newId: string) => {
+  const config = useRuntimeConfig();
+  const url = `${config.backendURL}/albums/${albumId}/id`;
+  const { data } = await usePost(url, { newId });
+  return { ...data.value };
+};
+
+/**
  * removeAlbumImage
  */
 export const removeAlbumImage = async (albumId: string, imgId: string) => {
   const config = useRuntimeConfig();
   const url = `${config.backendURL}/albums/${albumId}/image/${imgId}`;
-  const response = await fetch(url, {
-    method: 'DELETE',
-  });
-  return await response.json();
+  const { data } = await useDelete(url);
+  return { ...data.value };
 };
 
 /**
@@ -101,10 +127,8 @@ export const removeAlbumImage = async (albumId: string, imgId: string) => {
 export const resetAlbumImage = async (albumId: string) => {
   const config = useRuntimeConfig();
   const url = `${config.backendURL}/albums/${albumId}/reset/`;
-  const response = await fetch(url, {
-    method: 'DELETE',
-  });
-  return await response.json();
+  const { data } = await useDelete(url);
+  return { ...data.value };
 };
 
 /**

@@ -8,9 +8,11 @@ const bodyParser = require('body-parser');
 const {
   listAlbums,
   saveAlbum,
+  changeAlbumId,
   loadAlbum,
   removeAlbumItem,
-  resetAlbumItem,
+  resetAlbum,
+  deleteAlbum,
 } = require('./app');
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -37,7 +39,6 @@ app.use(
  * index
  */
 app.get('/', async (req, res) => {
-  // res.sendFile(__dirname + '/index.html');
   res.json({ msg: 'now or never' });
 });
 
@@ -45,7 +46,6 @@ app.get('/', async (req, res) => {
  * list albums
  */
 app.get('/albums', async (req, res) => {
-  // res.sendFile(__dirname + '/index.html');
   const ret = await listAlbums();
   if (ret.error) {
     res.json({ error: ret.error });
@@ -105,6 +105,17 @@ app.post('/albums/:albumId/detail', async (req, res) => {
   res.json(result);
 });
 
+/**
+ * change album ID
+ */
+app.post('/albums/:albumId/id', async (req, res) => {
+  const { albumId } = req.params;
+  console.log('save album ハンドラ', albumId);
+  const result = await changeAlbumId(albumId, req.body);
+
+  res.json(result);
+});
+
 // ------------------------
 // delete
 // ------------------------
@@ -137,13 +148,27 @@ app.delete('/albums/:albumId/image/:itemId', async (req, res) => {
  */
 app.delete('/albums/:albumId/reset', async (req, res) => {
   const { albumId } = req.params;
-  const result = await resetAlbumItem(albumId);
+  const result = await resetAlbum(albumId);
   if (result.error) {
     res.json(result);
     return;
   }
 
   res.json({ reset: true });
+});
+
+/**
+ * delete Album
+ */
+app.delete('/albums/:albumId/detail', async (req, res) => {
+  const { albumId } = req.params;
+  const result = await deleteAlbum(albumId);
+  if (result.error) {
+    res.json(result);
+    return;
+  }
+
+  res.json({ removed: true });
 });
 
 app.listen(9000);
