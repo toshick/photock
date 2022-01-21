@@ -1,5 +1,5 @@
 <template>
-  <main class>
+  <main class="pb-30">
     <GlobalHeader>
       <o-upload @input="onSelectFiles" multiple>
         <o-button tag="a" variant="primary" size="small" class="mr-3">
@@ -100,6 +100,7 @@
             <!-- <i class="fa fa-align-justify handle"></i> -->
 
             <AlbumItem
+              :ref="setAlbumRef"
               :index="index"
               :item="element"
               @remove="removeItem"
@@ -110,6 +111,7 @@
               "
               @move-top="() => moveTop(index)"
               @move-bottom="() => moveBottom(index)"
+              @checked="(checked) => itemChecked(checked, element.id)"
             />
           </li>
         </template>
@@ -147,6 +149,38 @@
         </div>
       </template>
     </Overlay>
+
+    <!-- 移動 -->
+    <div class="moveItem" :class="moveItemClass">
+      <p class="px-2">選択した {{ selectedItems.length }} 個を</p>
+      <FormInput
+        name="moveItem"
+        placeholder="移動先番号"
+        size="small"
+        :yup="yup.number().typeError('数字を入力してください')"
+        :val="form.moveIndex"
+        @input="(val:string) => (form.moveIndex = val)"
+        :top-message="true"
+        :hide-error-message="true"
+      >
+        <template v-slot:right="{ meta, val }" class="xxx">
+          <p class="px-2">の直後に</p>
+          <o-button
+            tag="a"
+            variant="primary"
+            size="small"
+            class=""
+            @click="bulkMove"
+            :disabled="!meta.valid"
+          >
+            <span>まとめて移動</span>
+          </o-button>
+          <o-button tag="a" size="small" class="ml-5" @click="clearChecked">
+            <span><i class="fas fa-times mr-2"></i>選択解除</span>
+          </o-button>
+        </template>
+      </FormInput>
+    </div>
   </main>
 </template>
 
@@ -154,8 +188,16 @@
 import type { PropType } from 'vue';
 import * as yup from 'yup';
 import draggable from 'vuedraggable';
-import type { Album, AlbumItem } from '@/types/apptype';
+import type { Album, AlbumItem as Item } from '@/types/apptype';
 import { createToast, asort, zeropad } from '@/util/helper';
+import AlbumItem from '@/components/album/AlbumItem.vue';
+
+type AlbumItemComponent = InstanceType<typeof AlbumItem>;
+type ItemReactiveData = {
+  saved: boolean;
+  checked: boolean;
+  index: number;
+};
 const router = useRouter();
 
 const oruga = inject('oruga');
@@ -170,10 +212,11 @@ const dragList = ref([]);
 const savedDescription = ref(false);
 const resetting = ref(false);
 const deleting = ref(false);
-const itemReactiveData = reactive<{ [key: string]: { saved: boolean } }>({});
+const itemReactiveData = reactive<{ [key: string]: ItemReactiveData }>({});
 const form = reactive({
   albumId,
   albumDescription: albumData.value.albumDescription || '',
+  moveIndex: '',
 });
 const albumIdEditted = computed(() => {
   return form.albumId !== albumId;
@@ -182,14 +225,42 @@ const albumDescriptionEditted = computed(() => {
   return form.albumDescription !== albumData.value.albumDescription;
 });
 
+const selectedItems = computed(() => {
+  return Object.keys(itemReactiveData).filter((id) => {
+    return itemReactiveData[id].checked;
+  });
+});
+
+const showMoveItem = computed(() => selectedItems.value.length > 0);
+const moveItemClass = computed(() => {
+  const ret: { [key: string]: boolean } = {};
+  if (showMoveItem.value) {
+    ret['-show'] = true;
+  }
+  return ret;
+});
+
 watchEffect(() => {
-  albumData.value.items.forEach((i: AlbumItem) => {
+  albumData.value.items.forEach((i: Item) => {
+    console.log('i', { ...i });
+
     if (!itemReactiveData[i.id]) {
-      itemReactiveData[i.id] = { saved: false };
+      itemReactiveData[i.id] = {
+        saved: false,
+        checked: false,
+        index: typeof i.index === 'string' ? +i.index : null,
+      };
     }
   });
   dragList.value = asort([...albumData.value.items], 'index');
 });
+
+const albumRefs = ref<AlbumItemComponent[]>([]);
+const setAlbumRef = (a: AlbumItemComponent) => {
+  if (a) {
+    albumRefs.value.push(a);
+  }
+};
 
 /**
  * onSelectFiles
@@ -270,7 +341,7 @@ const saveAlbumId = async () => {
 /**
  * removeItem
  */
-const removeItem = async (item: AlbumItem) => {
+const removeItem = async (item: Item) => {
   const res = await removeAlbumImage(albumId, item.id);
   if (res.error) {
     toast.ng(`❗️画像削除エラー ${res.error}`);
@@ -283,7 +354,7 @@ const removeItem = async (item: AlbumItem) => {
 /**
  * saveItem
  */
-const saveItem = async (item: AlbumItem) => {
+const saveItem = async (item: Item) => {
   const items = albumData.value.items.map((i) => {
     if (i.id === item.id) return item;
     return i;
@@ -378,6 +449,66 @@ const moveBottom = async (index: number) => {
   await onChangeSort();
 };
 
+const itemChecked = async (checked: boolean, id: string) => {
+  itemReactiveData[id].checked = checked;
+};
+
+const clearChecked = () => {
+  albumRefs.value.forEach((myref: AlbumItemComponent) => {
+    myref.resetChecked();
+  });
+};
+
+type RemoveItem = { item: Item; remove: boolean };
+
+/**
+ * 1. オリジナル配列にremoveフラグを付与した配列を作成
+ * 2. 後で削除するための印として移動アイテムと同一オブジェクトにremove: trueをセット
+ * 3. 指定箇所に移動アイテムを重複した状態で追加（removeはfalse）
+ * 4. 最後にremove: trueのアイテムを除外してオリジナル配列にもどしたものをセット
+ */
+const bulkMove = () => {
+  const moveIndex = +form.moveIndex + 1;
+  const ary = [...dragList.value].map((i: Item) => {
+    return { item: i, remove: false };
+  });
+  if (moveIndex > ary.length) {
+    return;
+  }
+
+  const items = selectedItems.value
+    .map((id: string) => {
+      return dragList.value.find((i: Item) => {
+        return i.id === id;
+      });
+    })
+    .filter((data) => data)
+    .map((data) => {
+      return { item: data, remove: false };
+    });
+
+  items.forEach((i: RemoveItem) => {
+    const find = ary.find((a) => {
+      return a.item.id === i.item.id;
+    });
+    if (find) {
+      find.remove = true;
+    }
+  });
+
+  ary.splice(moveIndex, 0, ...items);
+  dragList.value = ary
+    .filter((a) => {
+      return !a.remove;
+    })
+    .map((a) => {
+      return a.item;
+    });
+
+  // 選択解除
+  clearChecked();
+};
+
 //----------------------
 // use
 //----------------------
@@ -414,5 +545,36 @@ const moveBottom = async (index: number) => {
 }
 .imglist-item {
   margin: 0px 16px 30px 0;
+}
+</style>
+
+<style lang="scss">
+.moveItem {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #fff7f6;
+  padding: 20px 30px 20px;
+  box-shadow: 0 0 2px 1px rgba(black, 0.13);
+  width: 100%;
+
+  position: fixed;
+  bottom: -70px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+
+  transition: all 0.3s ease;
+  &.-show {
+    bottom: 0;
+  }
+  .field.has-addons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    & > .control {
+      width: 90px;
+    }
+  }
 }
 </style>

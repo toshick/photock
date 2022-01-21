@@ -1,5 +1,9 @@
 <template>
-  <o-field :message="errorMessage" :label="label" :class="props.class">
+  <o-field
+    :message="props.hideErrorMessage ? '' : errorMessage"
+    :label="label"
+    :class="myClass"
+  >
     <o-input
       v-model="myval"
       :placeholder="placeholder"
@@ -55,6 +59,14 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  hideErrorMessage: {
+    type: Boolean,
+    default: false,
+  },
+  topMessage: {
+    type: Boolean,
+    default: false,
+  },
   textarea: {
     type: Boolean,
     default: false,
@@ -64,6 +76,18 @@ const props = defineProps({
     default: null,
   },
 });
+const myClass: { [key: string]: boolean } = {
+  myform: true,
+};
+if (props.class) {
+  props.class.split(' ').forEach((str) => {
+    myClass[str] = true;
+  });
+}
+if (props.topMessage) {
+  myClass['-top-message'] = true;
+}
+
 const inputType = computed(() => (props.textarea ? 'textarea' : 'text'));
 const myPropVal = computed(() => props.val);
 const schema = computed(() => {
@@ -98,19 +122,28 @@ const onIconClick = () => {
 
 <style lang="scss">
 .field {
+  position: relative;
   // display: inline-block;
   // margin: 0;
   & > .label {
     font-weight: normal;
+  }
+  &.-top-message {
+    .help {
+      position: absolute;
+      bottom: 100%;
+      left: 0;
+      padding-bottom: 4px;
+      white-space: nowrap;
+    }
   }
 }
 .help {
   color: var(--danger-color);
 }
 .input {
-  background-color: #fae9e8;
+  background: linear-gradient(#fae9e8, #f7dbd9);
   // border-color: rgba(#e7796a, 0.6);
-  border: none;
   border: solid 1px #fff;
 
   &:hover {

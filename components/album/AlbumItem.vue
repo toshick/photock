@@ -13,16 +13,20 @@
         size="small"
         :yup="$vali.yup(yup.string(), $vali.max(40))"
         :val="form.title"
+        :top-message="true"
         expanded
         @input="(val:string) => (form.title = val)"
       >
       </FormInput>
+      <p class="ml-2">
+        <o-checkbox v-model="checked"></o-checkbox>
+      </p>
     </header>
     <div class="imgitem-body">
       <!-- イメージ -->
       <div class="imgitem-img">
         <figure class="imgitem-imgholder">
-          <img :src="item.img" alt="" lazy />
+          <img :src="item.img" alt="" lazy loading="lazy" />
           <!-- 右側 -->
           <nav class="imgitem-ui imgitem-ui-r">
             <!-- 保存ボタン -->
@@ -108,6 +112,7 @@ import type { AlbumItem } from '@/types/apptype';
 import * as yup from 'yup';
 import { zeropad } from '@/util/helper';
 
+const emit = defineEmits(['checked']);
 const props = defineProps({
   index: {
     type: Number,
@@ -135,6 +140,7 @@ const form = reactive({
   description: props.item.description || '',
 });
 
+const checked = ref(false);
 const index = computed(() => zeropad(props.index || 0, 3));
 const item = computed(() => props.item);
 const saved = ref(false);
@@ -152,6 +158,9 @@ const revert = () => {
   form.title = props.item.title;
   form.description = props.item.description;
 };
+const resetChecked = () => {
+  checked.value = false;
+};
 
 watch(
   () => props.saved,
@@ -159,6 +168,14 @@ watch(
     saved.value = props.saved;
   },
 );
+watch(
+  () => checked.value,
+  () => {
+    emit('checked', checked.value);
+  },
+);
+
+defineExpose({ resetChecked });
 </script>
 
 <style scoped lang="scss">
@@ -183,6 +200,7 @@ watch(
     & > .field {
       flex: 1 0 auto;
       border-radius: 4px;
+      margin: 0;
     }
   }
   &-body {

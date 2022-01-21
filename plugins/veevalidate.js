@@ -35,6 +35,14 @@ const ValidationSchema = {
           if (!msg) msg = `${num}文字以下にするケロ`;
           return schema.max(num, msg);
         },
+        /**
+         * integer
+         */
+        integer:
+          (msg = '数字だぞ') =>
+          (schema) => {
+            return schema.integer(msg);
+          },
       };
   },
 };
