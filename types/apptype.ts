@@ -16,6 +16,12 @@ export type AlbumItem = {
   description: string;
 };
 
+export type AlbumItemEdit = AlbumItem & {
+  remove?: boolean;
+  saved?: boolean;
+  checked?: boolean;
+};
+
 export type Album = {
   name: string;
   path: string;

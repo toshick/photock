@@ -29,40 +29,38 @@
           <img :src="item.img" alt="" lazy loading="lazy" />
           <!-- 右側 -->
           <nav class="imgitem-ui imgitem-ui-r">
-            <!-- 保存ボタン -->
-            <a
-              v-if="editted"
-              class="btn-save iconbutton"
-              @click="
-                () =>
-                  $emit('save', {
-                    ...item,
-                    title: form.title,
-                    description: form.description,
-                  })
-              "
-              ><i class="fas fa-arrow-up"></i
-            ></a>
-          </nav>
-          <nav class="imgitem-ui imgitem-ui-b">
             <!-- もどすボタン -->
             <a v-if="editted" class="btn-revert iconbutton" @click="revert"
               ><i class="fas fa-undo"></i
             ></a>
           </nav>
+          <!-- 保存ボタン -->
+          <a
+            v-if="editted"
+            class="btn-save iconbutton"
+            @click="
+              () =>
+                $emit('save', {
+                  ...item,
+                  title: form.title,
+                  description: form.description,
+                })
+            "
+            ><i class="fas fa-arrow-up"></i
+          ></a>
           <!-- 左側 -->
           <nav class="imgitem-ui imgitem-ui-l">
             <!-- 削除ボタン -->
-            <a class="btn-remove iconbutton" @click="state.removing = true"
+            <!-- <a class="btn-remove iconbutton" @click="state.removing = true"
               ><i class="far fa-trash-alt"></i
-            ></a>
-            <!-- 削除ボタン -->
+            ></a> -->
+            <!-- 移動ボタン -->
             <a class="btn-remove iconbutton" @click="$emit('move-top')"
-              ><i class="fas fa-arrow-up"></i
+              ><i class="fas fa-chevron-up"></i
             ></a>
-            <!-- 削除ボタン -->
+            <!-- 移動ボタン -->
             <a class="btn-remove iconbutton" @click="$emit('move-bottom')"
-              ><i class="fas fa-arrow-down"></i
+              ><i class="fas fa-chevron-down"></i
             ></a>
           </nav>
         </figure>
@@ -112,11 +110,21 @@ import type { AlbumItem } from '@/types/apptype';
 import * as yup from 'yup';
 import { zeropad } from '@/util/helper';
 
-const emit = defineEmits(['checked']);
+const emit = defineEmits([
+  'checked',
+  'save',
+  'remove',
+  'move-top',
+  'move-bottom',
+]);
 const props = defineProps({
   index: {
     type: Number,
     default: 0,
+  },
+  id: {
+    type: String,
+    required: true,
   },
   class: {
     type: String,
@@ -161,13 +169,13 @@ const revert = () => {
 const resetChecked = () => {
   checked.value = false;
 };
+const showSaved = () => {
+  saved.value = true;
+  setTimeout(() => {
+    saved.value = false;
+  }, 1000);
+};
 
-watch(
-  () => props.saved,
-  () => {
-    saved.value = props.saved;
-  },
-);
 watch(
   () => checked.value,
   () => {
@@ -175,7 +183,7 @@ watch(
   },
 );
 
-defineExpose({ resetChecked });
+defineExpose({ resetChecked, showSaved });
 </script>
 
 <style scoped lang="scss">
@@ -209,10 +217,23 @@ defineExpose({ resetChecked });
     background-color: white;
     box-shadow: 0 2px 3px 1px rgba(#000, 0.13);
   }
-  .btn-save,
-  .btn-revert {
+  .btn-save {
     display: block;
     color: var(--primary-color);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 20;
+    font-size: 20px;
+    &::after {
+      width: 50px;
+      height: 50px;
+      box-shadow: 0 2px 3px 1px rgba(#000, 0.13);
+    }
+  }
+  .btn-revert {
+    display: block;
   }
   &-ui {
     & > a {

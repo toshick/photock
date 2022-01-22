@@ -47,7 +47,9 @@ export const useAppState = () => {
 export const useAlbumList = () => {
   const { data, pending, refresh, error } = useGetLazy('/api/albums');
   const albums = computed(() => data?.value?.albums || []);
-
+  if (error.value) {
+    return { error: error.value.message };
+  }
   return { albums, refresh };
 };
 
@@ -55,13 +57,16 @@ export const useAlbumList = () => {
  * saveAlbumDetail
  */
 export const saveAlbumDetail = async (albumId: string, albumData: object) => {
+  const config = useRuntimeConfig();
   const { data, pending, refresh, error } = await usePost(
-    `/api/albums/${albumId}/detail`,
+    `${config.backendURL}/albums/${albumId}/detail`,
     {
       ...albumData,
     },
   );
-
+  if (error.value) {
+    return { error: error.value.message };
+  }
   return { ...data?.value };
 };
 
@@ -73,7 +78,9 @@ export const deleteAlbum = async (albumId: string) => {
   const { data, pending, refresh, error } = await useDelete(
     `${config.backendURL}/albums/${albumId}/detail`,
   );
-
+  if (error.value) {
+    return { error: error.value.message };
+  }
   return { ...data?.value };
 };
 
@@ -107,7 +114,10 @@ export const saveAlbumImage = async (
 export const changeAlbumId = async (albumId: string, newId: string) => {
   const config = useRuntimeConfig();
   const url = `${config.backendURL}/albums/${albumId}/id`;
-  const { data } = await usePost(url, { newId });
+  const { data, error } = await usePost(url, { newId });
+  if (error.value) {
+    return { error: error.value.message };
+  }
   return { ...data.value };
 };
 
@@ -117,7 +127,10 @@ export const changeAlbumId = async (albumId: string, newId: string) => {
 export const removeAlbumImage = async (albumId: string, imgId: string) => {
   const config = useRuntimeConfig();
   const url = `${config.backendURL}/albums/${albumId}/image/${imgId}`;
-  const { data } = await useDelete(url);
+  const { data, error } = await useDelete(url);
+  if (error.value) {
+    return { error: error.value.message };
+  }
   return { ...data.value };
 };
 
@@ -127,7 +140,10 @@ export const removeAlbumImage = async (albumId: string, imgId: string) => {
 export const resetAlbumImage = async (albumId: string) => {
   const config = useRuntimeConfig();
   const url = `${config.backendURL}/albums/${albumId}/reset/`;
-  const { data } = await useDelete(url);
+  const { data, error } = await useDelete(url);
+  if (error.value) {
+    return { error: error.value.message };
+  }
   return { ...data.value };
 };
 
@@ -146,7 +162,9 @@ export const useAlbumDetail = async (albumId: string) => {
     }
     return ret;
   });
-
+  if (error.value) {
+    return { error: error.value.message };
+  }
   return { albumData, refresh };
 };
 
@@ -161,7 +179,8 @@ export const testGet = async (albumId: string, d: object) => {
       ...d,
     },
   );
-  const result = data?.value ? { ...data?.value } : { error: true };
-
-  return result;
+  if (error.value) {
+    return { error: error.value.message };
+  }
+  return { ...data?.value };
 };

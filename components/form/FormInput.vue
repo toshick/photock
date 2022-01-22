@@ -142,8 +142,9 @@ const onIconClick = () => {
   color: var(--danger-color);
 }
 .input {
-  background: linear-gradient(#fae9e8, #f7dbd9);
-  // border-color: rgba(#e7796a, 0.6);
+  // background: linear-gradient(#fae9e8, #f7dbd9);
+  background-color: white;
+  box-shadow: 0 2px 3px 1px rgba(#000, 0.13);
   border: solid 1px #fff;
 
   &:hover {

@@ -1,122 +1,136 @@
 <template>
-  <main class="pb-30">
+  <article class="pb-30">
     <GlobalHeader>
-      <o-upload @input="onSelectFiles" multiple>
+      <template #left>
+        <o-button
+          tag="a"
+          variant="success"
+          size=""
+          class="btn-saveIndex"
+          :class="saveIndexBtnClass"
+          @click="startSaveSortIndex"
+        >
+          <span><i class="mr-2 fas fa-arrow-up"></i>並び替えを保存</span>
+        </o-button>
+      </template>
+      <o-upload @input="onUploadFiles" multiple>
         <o-button tag="a" variant="primary" size="small" class="mr-3">
           <span
             ><i class="mr-2 fas fa-arrow-alt-circle-up"></i>イメージ追加</span
           >
         </o-button>
       </o-upload>
-      <o-button
+      <!-- <o-button
         class="mr-3"
         size="small"
         variant="primary"
         @click="resetting = true"
         >リセット</o-button
-      >
-      <o-button size="small" variant="primary" @click="deleting = true"
+      > -->
+      <o-button size="small" variant="primary" @click="deletingAlbum = true"
         ><i class="mr-2 fas fa-skull-crossbones"></i>アルバム削除</o-button
       >
     </GlobalHeader>
+    <div class="flex">
+      <main class="flex-1 flex-grow-auto flex-shrink-0">
+        <!-- <p>itemList {{ itemList.length }} itemListBk {{ itemListBk.length }}</p> -->
+        <!-- イメージ一覧 -->
+        <section class="container pl-8 pt-8">
+          <draggable
+            tag="ul"
+            class="imglist"
+            :list="dragList"
+            handle=".handle"
+            item-key="id"
+            @sort="onSortItem"
+          >
+            <template #item="{ element, index }">
+              <li class="imglist-item">
+                <AlbumItem
+                  :ref="setAlbumRef"
+                  :id="element.id"
+                  :index="index"
+                  :item="element"
+                  @save="saveItem"
+                  :saved="element.saved"
+                  @move-top="() => moveTop(index)"
+                  @move-bottom="() => moveBottom(index)"
+                  @checked="(checked) => (element.checked = checked)"
+                />
+              </li>
+            </template>
+          </draggable>
+        </section>
+      </main>
+      <aside class="w-400px pr-8">
+        <div class="sticky top-70px">
+          <Stack :space="5">
+            <!-- albumId -->
+            <div class="text-lg">
+              <FormInput
+                name="albumId"
+                label="アルバムID"
+                placeholder="アルバムID"
+                class=""
+                size="small"
+                :yup="$vali.yup(yup.string())"
+                :val="form.albumId"
+                @input="(val:string) => (form.albumId = val)"
+              >
+                <template #right>
+                  <o-button
+                    tag="a"
+                    variant="primary"
+                    size="small"
+                    class="mx-3"
+                    @click="saveAlbumId"
+                    :disabled="!albumIdEditted"
+                  >
+                    <span>変更</span>
+                  </o-button>
+                </template>
+              </FormInput>
+            </div>
+            <!-- description -->
+            <div class="albumDescription">
+              <FormInput
+                textarea
+                expanded
+                label="アルバム説明"
+                name="albumDescription"
+                placeholder="アルバム説明"
+                size="small"
+                :yup="$vali.yup(yup.string())"
+                :val="form.albumDescription"
+                @input="(val:string) => (form.albumDescription = val)"
+              >
+              </FormInput>
+              <div class="mt-3 text-right flex">
+                <p class="text-green-500">
+                  <transition name="fade">
+                    <span v-if="savedDescription" class="block">
+                      <i class="fas fa-check"></i>
+                      Saved</span
+                    >
+                  </transition>
+                </p>
+                <o-button
+                  tag="a"
+                  variant="primary"
+                  size="small"
+                  class="ml-auto"
+                  @click="saveDescription"
+                  :disabled="!albumDescriptionEditted"
+                >
+                  <span>保存</span>
+                </o-button>
+              </div>
+            </div>
+          </Stack>
+        </div>
+      </aside>
+    </div>
 
-    <section class="container pt-5 pb-20 flex">
-      <!-- albumId -->
-      <div class="pb-4 text-lg">
-        <FormInput
-          name="albumId"
-          label="アルバムID"
-          placeholder="アルバムID"
-          class=""
-          size="small"
-          :yup="$vali.yup(yup.string())"
-          :val="form.albumId"
-          @input="(val:string) => (form.albumId = val)"
-        >
-          <template #right>
-            <o-button
-              tag="a"
-              variant="primary"
-              size="small"
-              class="mx-3"
-              @click="saveAlbumId"
-              :disabled="!albumIdEditted"
-            >
-              <span>保存</span>
-            </o-button>
-          </template>
-        </FormInput>
-      </div>
-      <!-- description -->
-      <div class="albumDescription ml-4">
-        <FormInput
-          textarea
-          label="アルバム説明"
-          name="albumDescription"
-          placeholder="アルバム説明"
-          class="w-screen-md"
-          size="small"
-          :yup="$vali.yup(yup.string())"
-          :val="form.albumDescription"
-          expanded
-          @input="(val:string) => (form.albumDescription = val)"
-        >
-          <template #right>
-            <o-button
-              tag="a"
-              variant="primary"
-              size="small"
-              class="mx-3"
-              @click="saveDescription"
-              :disabled="!albumDescriptionEditted"
-            >
-              <span>保存</span>
-            </o-button>
-          </template>
-        </FormInput>
-        <!-- Saved -->
-        <transition name="fade">
-          <div v-if="savedDescription" class="albumDescription-saved">
-            <span>
-              <i class="fas fa-check"></i>
-              Saved</span
-            >
-          </div>
-        </transition>
-      </div>
-    </section>
-    <!-- イメージ一覧 -->
-    <section class="container">
-      <draggable
-        tag="ul"
-        class="imglist"
-        :list="dragList"
-        handle=".handle"
-        item-key="id"
-        @change="onChangeSort"
-      >
-        <template #item="{ element, index }">
-          <li class="imglist-item">
-            <!-- <i class="fa fa-align-justify handle"></i> -->
-
-            <AlbumItem
-              :ref="setAlbumRef"
-              :index="index"
-              :item="element"
-              @remove="removeItem"
-              @save="saveItem"
-              :saved="
-                itemReactiveData[element.id] &&
-                itemReactiveData[element.id].saved
-              "
-              @move-top="() => moveTop(index)"
-              @move-bottom="() => moveBottom(index)"
-              @checked="(checked) => itemChecked(checked, element.id)"
-            />
-          </li>
-        </template>
-      </draggable>
-    </section>
     <!-- リセット確認 -->
     <Overlay :active="resetting">
       <div class="text-lg text-center">
@@ -133,15 +147,17 @@
         </div>
       </template>
     </Overlay>
-    <!-- 削除確認 -->
-    <Overlay :active="deleting">
+    <!-- アルバム削除確認 -->
+    <Overlay :active="deletingAlbum">
       <div class="text-lg text-center">
         <a class="text-red-500 px-4" @click="del"
           ><i class="fas fa-exclamation-triangle px-2"></i>アルバム "{{
             albumId
           }}" を削除</a
         >
-        <a class="text-gray-500 px-4" @click="deleting = false">キャンセル</a>
+        <a class="text-gray-500 px-4" @click="deletingAlbum = false"
+          >キャンセル</a
+        >
       </div>
       <template #description>
         <div class="text-center mt-12 text-sm">
@@ -149,10 +165,26 @@
         </div>
       </template>
     </Overlay>
+    <!-- 削除確認 -->
+    <Overlay :active="deleting">
+      <div class="text-lg text-center">
+        <a class="text-red-500 px-4" @click="startSaveSelectedState"
+          ><i class="fas fa-exclamation-triangle px-2"></i>選択ファイル
+          {{ selectedItems.length }}個 を削除</a
+        >
+        <a class="text-gray-500 px-4" @click="deleting = false">キャンセル</a>
+      </div>
+    </Overlay>
 
+    <!-- ボトムUI -->
+    <!-- <footer class="bottomUI">
+      <o-button tag="a" size="small" class="btn-right" @click="clearChecked">
+        <span><i class="fas fa-arrow-up mr-2"></i>変更を保存</span>
+      </o-button>
+    </footer> -->
     <!-- 移動 -->
-    <div class="moveItem" :class="moveItemClass">
-      <p class="px-2">選択した {{ selectedItems.length }} 個を</p>
+    <div class="bottomUI -moveItem" :class="moveItemClass">
+      <p class="pr-3">選択した {{ selectedItems.length }} 個を</p>
       <FormInput
         name="moveItem"
         placeholder="移動先番号"
@@ -163,43 +195,41 @@
         :top-message="true"
         :hide-error-message="true"
       >
-        <template v-slot:right="{ meta, val }" class="xxx">
-          <p class="px-2">の直後に</p>
+        <template v-slot:right="{ meta, val }">
           <o-button
             tag="a"
             variant="primary"
             size="small"
-            class=""
+            class="ml-2"
             @click="bulkMove"
             :disabled="!meta.valid"
           >
-            <span>まとめて移動</span>
-          </o-button>
-          <o-button tag="a" size="small" class="ml-5" @click="clearChecked">
-            <span><i class="fas fa-times mr-2"></i>選択解除</span>
+            <span class="">の直後にまとめて移動</span>
           </o-button>
         </template>
       </FormInput>
+      <p class="mx-3">または</p>
+      <o-button tag="a" variant="primary" size="small" @click="deleting = true">
+        <span class="">まとめて削除</span>
+      </o-button>
+
+      <o-button tag="a" size="small" class="btn-right" @click="clearChecked">
+        <span><i class="fas fa-times mr-2"></i>選択解除</span>
+      </o-button>
     </div>
-  </main>
+  </article>
 </template>
 
 <script setup lang="ts">
-import type { PropType } from 'vue';
 import * as yup from 'yup';
 import draggable from 'vuedraggable';
-import type { Album, AlbumItem as Item } from '@/types/apptype';
+import type { AlbumItem as Item, AlbumItemEdit } from '@/types/apptype';
 import { createToast, asort, zeropad } from '@/util/helper';
 import AlbumItem from '@/components/album/AlbumItem.vue';
 
 type AlbumItemComponent = InstanceType<typeof AlbumItem>;
-type ItemReactiveData = {
-  saved: boolean;
-  checked: boolean;
-  index: number;
-};
-const router = useRouter();
 
+const router = useRouter();
 const oruga = inject('oruga');
 const toast = createToast(oruga);
 const r = useRoute();
@@ -208,11 +238,13 @@ const { albumData, refresh } = await useAlbumDetail(albumId);
 
 // console.log('albumData', JSON.stringify(albumData.value.items));
 
+const itemList = ref([]);
+let itemListBk = [];
 const dragList = ref([]);
 const savedDescription = ref(false);
 const resetting = ref(false);
+const deletingAlbum = ref(false);
 const deleting = ref(false);
-const itemReactiveData = reactive<{ [key: string]: ItemReactiveData }>({});
 const form = reactive({
   albumId,
   albumDescription: albumData.value.albumDescription || '',
@@ -226,8 +258,8 @@ const albumDescriptionEditted = computed(() => {
 });
 
 const selectedItems = computed(() => {
-  return Object.keys(itemReactiveData).filter((id) => {
-    return itemReactiveData[id].checked;
+  return itemList.value.filter((i: AlbumItemEdit) => {
+    return i.checked;
   });
 });
 
@@ -241,31 +273,34 @@ const moveItemClass = computed(() => {
 });
 
 watchEffect(() => {
-  albumData.value.items.forEach((i: Item) => {
-    console.log('i', { ...i });
+  itemList.value = albumData.value.items;
+  itemListBk = [...albumData.value.items];
+});
 
-    if (!itemReactiveData[i.id]) {
-      itemReactiveData[i.id] = {
-        saved: false,
-        checked: false,
-        index: typeof i.index === 'string' ? +i.index : null,
-      };
-    }
-  });
-  dragList.value = asort([...albumData.value.items], 'index');
+watchEffect(() => {
+  dragList.value = asort([...itemList.value], 'index').filter(
+    (i: AlbumItemEdit) => !!i.remove === false,
+  );
 });
 
 const albumRefs = ref<AlbumItemComponent[]>([]);
 const setAlbumRef = (a: AlbumItemComponent) => {
   if (a) {
-    albumRefs.value.push(a);
+    const find = albumRefs.value.find((ref) => ref.$props.id === a.$props.id);
+    if (!find) {
+      albumRefs.value.push(a);
+    }
   }
 };
 
+const onSortItem = () => {
+  itemList.value = getAlbumItemsWithIndex(dragList.value);
+};
+
 /**
- * onSelectFiles
+ * onUploadFiles
  */
-const onSelectFiles = async (e: InputEvent) => {
+const onUploadFiles = async (e: InputEvent) => {
   const filelist: FileList = (e.target as HTMLInputElement).files;
   const files = Array.from(filelist);
   // upload imgs
@@ -281,10 +316,7 @@ const onSelectFiles = async (e: InputEvent) => {
 
   await refresh();
 
-  const items = (dragList.value || []).map((i, index) => {
-    return { ...i, index: zeropad(index, 5) };
-  });
-  const res = await save({ items });
+  const res = await saveSelectedState();
   if (res.error) {
     toast.ng('アップロード後アルバム保存に失敗したケロ');
     return res.error;
@@ -293,27 +325,15 @@ const onSelectFiles = async (e: InputEvent) => {
 };
 
 /**
- * save
- */
-const save = async (params: Partial<Album>) => {
-  if (!params) {
-    return { error: 'no params on save' };
-  }
-  const res = await saveAlbumDetail(albumId, {
-    ...albumData.value,
-    ...params,
-  });
-  if (res.error) {
-    return res.error;
-  }
-  return res;
-};
-
-/**
  * saveDescription
  */
 const saveDescription = async () => {
-  const res = await save({ albumDescription: form.albumDescription });
+  // アルバム保存
+  const res: any = await saveAlbumDetail(albumId, {
+    ...albumData.value,
+    albumDescription: form.albumDescription,
+  });
+
   if (res.error) {
     toast.ng(`❗️説明保存エラー ${res.error}`);
     return;
@@ -322,7 +342,7 @@ const saveDescription = async () => {
   savedDescription.value = true;
   setTimeout(() => {
     savedDescription.value = false;
-  }, 1000);
+  }, 2000);
 };
 
 /**
@@ -336,56 +356,46 @@ const saveAlbumId = async () => {
   }
   console.log('changeAlbumId', JSON.stringify(res.data));
   router.push(`/albums/${form.albumId}`);
-};
-
-/**
- * removeItem
- */
-const removeItem = async (item: Item) => {
-  const res = await removeAlbumImage(albumId, item.id);
-  if (res.error) {
-    toast.ng(`❗️画像削除エラー ${res.error}`);
-    return;
-  }
-  await refresh();
-  toast.ok('削除したケロ');
+  return res;
 };
 
 /**
  * saveItem
  */
-const saveItem = async (item: Item) => {
-  const items = albumData.value.items.map((i) => {
+const saveItem = async (item: AlbumItemEdit) => {
+  const items = itemList.value.map((i) => {
     if (i.id === item.id) return item;
     return i;
   });
   const res = await saveAlbumDetail(albumId, {
     ...albumData.value,
-    items,
+    items: items.map((i) => getAlbumItemForSend(i)),
   });
   if (res.error) {
     toast.ng(`❗️アイテム情報保存エラー ${res.error}`);
     return;
   }
   await refresh();
-  itemReactiveData[item.id].saved = true;
-  setTimeout(() => {
-    itemReactiveData[item.id].saved = false;
-  }, 1000);
+
+  // 保存したエフェクト
+  const targetRef = albumRefs.value.find((myref: AlbumItemComponent) => {
+    return myref.$props.id === item.id;
+  });
+  if (targetRef) targetRef.showSaved();
 };
 
 /**
  * reset
  */
 const reset = async () => {
-  resetting.value = false;
-  const res = await resetAlbumImage(albumId);
-  if (res.error) {
-    toast.ng(`❗️リセットエラー ${res.error}`);
-    return;
-  }
+  // const res = await resetAlbumImage(albumId);
+  // if (res.error) {
+  //   toast.ng(`❗️リセットエラー ${res.error}`);
+  //   return;
+  // }
   await refresh();
   toast.ok(`アルバム ${albumId} をリセットしたケロ`);
+  resetting.value = false;
 };
 
 /**
@@ -403,101 +413,149 @@ const del = async () => {
 };
 
 /**
- * reload
+ * startSaveSortIndex
+ *
  */
-const reload = async () => {
+const startSaveSortIndex = async () => {
+  // アルバム保存
+  const res: any = await saveAlbumDetail(albumId, {
+    ...albumData.value,
+    items: itemList.value.map((i) => getAlbumItemForSend(i)),
+  });
+  if (res.error) {
+    return res.error;
+  }
   await refresh();
-  toast.ok('リセットしたケロ');
+  toast.ok('Saved');
 };
 
 /**
- * onChangeSort
+ * startSaveSelectedState
  */
-const onChangeSort = async () => {
-  const items = (dragList.value || []).map((i, index) => {
-    return { ...i, index: zeropad(index, 5) };
-  });
-  const res = await saveAlbumDetail(albumId, {
-    ...albumData.value,
-    items,
-  });
+const startSaveSelectedState = async () => {
+  const res = await saveSelectedState();
+  deleting.value = false;
   if (res.error) {
-    toast.ng(`❗️ソート保存エラー ${res.error}`);
+    toast.ng(`❗️ ${res.error}`);
     return;
   }
   await refresh();
-  // toast.ok('順番変えたケロ');
+  toast.ok('Deleted');
+};
+
+const getAlbumItemForSend = (i: AlbumItemEdit): Item => {
+  return {
+    index: i.index,
+    id: i.id,
+    img: i.img,
+    title: i.title,
+    description: i.description,
+  };
+};
+
+const getAlbumItemsWithIndex = (ary: AlbumItemEdit[]) => {
+  return ary.map((i: AlbumItemEdit, index: number) => {
+    return { ...i, index: zeropad(index, 5) };
+  });
+};
+
+/**
+ * saveSelectedState
+ *
+ */
+const saveSelectedState = async () => {
+  const items = itemList.value;
+  const itemsActive = items.filter((i: AlbumItemEdit) => !!i.checked === false);
+  const itemsRemove = items.filter((i: AlbumItemEdit) => !!i.checked === true);
+
+  // アイテム削除
+  const reslist = await Promise.all(
+    itemsRemove.map((i: AlbumItemEdit) => {
+      return removeAlbumImage(albumId, i.id);
+    }),
+  );
+  const errors = reslist.filter((res) => !!res.error).map((res) => res.error);
+  if (errors.length > 0) {
+    return { error: errors[0] };
+  }
+  // アルバム保存
+  const res: any = await saveAlbumDetail(albumId, {
+    ...albumData.value,
+    items: itemsActive.map((i) => getAlbumItemForSend(i)),
+  });
+  if (res.error) {
+    return res.error;
+  }
+  return { removed: true };
 };
 
 const moveTop = async (index: number) => {
   if (index === 0) return;
-  const ary = [...dragList.value];
+  const ary = [...itemList.value];
   const item = ary[index];
   ary.splice(index, 1);
   ary.unshift(item);
-  dragList.value = ary;
-  await onChangeSort();
+  itemList.value = getAlbumItemsWithIndex(ary);
 };
 
 const moveBottom = async (index: number) => {
-  const ary = [...dragList.value];
+  const ary = [...itemList.value];
   if (index === ary.length - 1) return;
   const item = ary[index];
   ary.splice(index, 1);
   ary.push(item);
-  dragList.value = ary;
-  await onChangeSort();
-};
-
-const itemChecked = async (checked: boolean, id: string) => {
-  itemReactiveData[id].checked = checked;
+  itemList.value = getAlbumItemsWithIndex(ary);
 };
 
 const clearChecked = () => {
+  console.log('せんたくかいじょ', albumRefs.value.length);
   albumRefs.value.forEach((myref: AlbumItemComponent) => {
     myref.resetChecked();
   });
 };
 
-type RemoveItem = { item: Item; remove: boolean };
+type RemoveItem = { item: AlbumItemEdit; remove: boolean };
 
 /**
- * 1. オリジナル配列にremoveフラグを付与した配列を作成
- * 2. 後で削除するための印として移動アイテムと同一オブジェクトにremove: trueをセット
- * 3. 指定箇所に移動アイテムを重複した状態で追加（removeはfalse）
- * 4. 最後にremove: trueのアイテムを除外してオリジナル配列にもどしたものをセット
+ * 指定インデックスに選択アイテムを移動
  */
-const bulkMove = () => {
+const bulkMove = async () => {
   const moveIndex = +form.moveIndex + 1;
-  const ary = [...dragList.value].map((i: Item) => {
-    return { item: i, remove: false };
-  });
+  const selectedItemIds = selectedItems.value;
+  /**
+   * 全アイテムのフィルタ配列を生成（移動アイテムに削除フラグを付与）
+   */
+  const ary: RemoveItem[] = [...itemList.value].map(
+    (i: AlbumItemEdit): RemoveItem => {
+      const find = selectedItemIds.find((i2: AlbumItemEdit) => {
+        return i2.id === i.id;
+      });
+      return { item: i, remove: Boolean(find) };
+    },
+  );
   if (moveIndex > ary.length) {
     return;
   }
 
-  const items = selectedItems.value
-    .map((id: string) => {
-      return dragList.value.find((i: Item) => {
-        return i.id === id;
-      });
-    })
-    .filter((data) => data)
+  /**
+   * 指定インデックスに追加するため、
+   * 選択されたアイテムのフィルタ配列（削除フラグなし）を作成
+   */
+  const items: RemoveItem[] = ary
+    .filter((data) => data.remove)
     .map((data) => {
-      return { item: data, remove: false };
+      return { ...data, remove: false };
     });
 
-  items.forEach((i: RemoveItem) => {
-    const find = ary.find((a) => {
-      return a.item.id === i.item.id;
-    });
-    if (find) {
-      find.remove = true;
-    }
-  });
-
+  /**
+   * 指定インデックスに追加
+   */
   ary.splice(moveIndex, 0, ...items);
-  dragList.value = ary
+
+  /**
+   * 削除フラグを除外した配列を生成
+   */
+  const filtered: AlbumItemEdit[] = ary
     .filter((a) => {
       return !a.remove;
     })
@@ -507,7 +565,37 @@ const bulkMove = () => {
 
   // 選択解除
   clearChecked();
+  form.moveIndex = '';
+  await nextTick();
+
+  itemList.value = getAlbumItemsWithIndex(filtered);
 };
+
+const hasSortChanges = computed(() => {
+  const ary1 = itemList.value;
+  const ary2 = itemListBk;
+  if (ary1.length !== ary2.length) return true;
+  let hasDiff = false;
+  for (let i = 0; i < ary1.length; i++) {
+    const itemA = ary1[i];
+    const itemB = ary2[i];
+    if (itemA.id !== itemB.id) {
+      hasDiff = true;
+      break;
+    }
+  }
+
+  return hasDiff;
+});
+
+const saveIndexBtnClass = computed(() => {
+  const ret = {};
+  if (hasSortChanges.value) {
+    ret['-show'] = true;
+  }
+
+  return ret;
+});
 
 //----------------------
 // use
@@ -515,8 +603,29 @@ const bulkMove = () => {
 </script>
 
 <style scoped lang="scss">
+.btn-saveIndex {
+  display: block;
+  position: absolute;
+  top: -32px;
+  left: 140px;
+  // box-shadow: 0 0 2px 1px white;
+  border: solid 1px #fff;
+  transition: all 0.3s ease;
+  pointer-events: none;
+  &.-show {
+    top: -5px;
+    pointer-events: auto;
+  }
+
+  &[disabled] {
+    opacity: 1;
+    border: solid 1px #fff;
+  }
+  &:hover {
+    border: solid 1px #fff;
+  }
+}
 .albumDescription {
-  display: inline-block;
   position: relative;
   .field {
     margin: 0;
@@ -549,32 +658,46 @@ const bulkMove = () => {
 </style>
 
 <style lang="scss">
-.moveItem {
+.bottomUI {
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #fff7f6;
+  background-color: #ffefc8;
   padding: 20px 30px 20px;
-  box-shadow: 0 0 2px 1px rgba(black, 0.13);
+  box-shadow: 0 0 4px 2px rgba(black, 0.13);
   width: 100%;
+  height: 50px;
 
   position: fixed;
-  bottom: -70px;
+  top: 0;
   left: 50%;
   transform: translateX(-50%);
   z-index: 5;
-
-  transition: all 0.3s ease;
-  &.-show {
-    bottom: 0;
+  .myform {
+    margin: 0;
   }
-  .field.has-addons {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    & > .control {
-      width: 90px;
+
+  &.-moveItem {
+    top: -50px;
+
+    transition: all 0.3s ease;
+    &.-show {
+      top: 0;
     }
+    .field.has-addons {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      & > .control {
+        width: 90px;
+      }
+    }
+  }
+  .btn-right {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
   }
 }
 </style>

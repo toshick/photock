@@ -6,11 +6,7 @@
   --second-color: #ffff8c;
   --danger-color: #ff3333;
   // --input-bg-color: rgba(#e7796a, 0.1);
-}
-
-html {
-  background-color: #ffffff;
-  background-image: url('/img/concrete-wall.png');
+  --sack-space: 4px;
 }
 
 /* ------------------ */
@@ -24,6 +20,11 @@ $primary: #b82b19;
 $primary-light: findLightColor($primary);
 $primary-dark: findDarkColor($primary);
 $primary-invert: findColorInvert($primary);
+
+$success: #7fad82;
+$primary-light: findLightColor($success);
+$primary-dark: findDarkColor($success);
+$primary-invert: findColorInvert($success);
 
 // // Lists and maps
 // $custom-colors: null !default;
@@ -122,14 +123,20 @@ $modal-background-background-color: rgba(white, 0.8);
 
 .toast-notification {
   padding: 10px 20px;
+  z-index: 20;
+  box-shadow: 0 0 1px 1px rgba(white, 0.6);
+  min-width: 300px;
   &.is-top {
     position: fixed;
     top: 10px;
     left: 50%;
-    z-index: 20;
-    min-width: 300px;
+
     transform: translateX(-50%);
-    box-shadow: 0 0 1px 1px rgba(white, 0.6);
+  }
+  &.is-top-left {
+    position: fixed;
+    top: 20px;
+    left: 20px;
   }
 }
 
@@ -160,3 +167,8 @@ $modal-background-background-color: rgba(white, 0.8);
 
 @import './_components.scss';
 // @import '@oruga-ui/theme-bulma/dist/scss/bulma';
+
+html {
+  background-color: #eee;
+  background-image: url('/img/concrete-wall.png');
+}

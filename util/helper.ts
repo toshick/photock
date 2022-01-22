@@ -20,8 +20,8 @@ export const createToast = (oruga) => {
       oruga.notification.open({
         message: msg,
         rootClass: 'toast-notification',
-        position: 'top',
-        variant: 'info',
+        position: 'top-left',
+        variant: 'success',
         duration: 3000,
       });
     },
@@ -29,8 +29,8 @@ export const createToast = (oruga) => {
       oruga.notification.open({
         message: msg,
         rootClass: 'toast-notification',
-        position: 'top',
-        variant: 'warning',
+        position: 'top-left',
+        variant: 'danger',
         duration: 3000,
       });
     },
