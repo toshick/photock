@@ -36,6 +36,8 @@ exports.saveAlbum = async function (albumId, body) {
   if (!albumId) {
     return { error: 'albumId is not provided' };
   }
+
+  // 保存
   const saved = await saveAlbumJson(albumId, body);
   if (!saved) {
     return { error: 'can not write json for', albumId };

@@ -2,6 +2,7 @@ const path = require('path');
 const fs = require('fs-extra');
 const glob = require('glob');
 const JSON_FILE_NAME = 'data.json';
+const JSON_FILE_NAME_BK = 'data-bk.json';
 const initialData = { items: [], description: '' };
 
 /**
@@ -56,36 +57,55 @@ exports.saveJson = (path, data) => {
 };
 
 /**
+ * backupAlbumJson
+ */
+exports.backupAlbumJson = async (albumId) => {
+  const dir = path.join(__dirname, '../public/albums', albumId);
+  const filePath = path.join(dir, JSON_FILE_NAME);
+  const fileBkPath = path.join(dir, JSON_FILE_NAME_BK);
+  // backup
+  const exist = await fs.pathExists(filePath);
+  if (exist) {
+    try {
+      console.log('バックアップ実行', fileBkPath);
+      fs.copySync(filePath, fileBkPath, { overwrite: true });
+    } catch (error) {
+      console.log('バックアップ失敗');
+    }
+  }
+};
+
+/**
  * saveAlbumJson
  */
-exports.saveAlbumJson = (albumId, data) => {
+exports.saveAlbumJson = async (albumId, data) => {
   const dir = path.join(__dirname, '../public/albums', albumId);
   try {
     fs.ensureDirSync(dir);
   } catch (error) {
     return false;
   }
-
-  return exports.saveJson(path.join(dir, JSON_FILE_NAME), data);
+  const filePath = path.join(dir, JSON_FILE_NAME);
+  return exports.saveJson(filePath, data);
 };
 
 /**
  * loadAlbumJson
  */
 exports.loadAlbumJson = async (albumId) => {
-  const filepath = path.join(
+  const filePath = path.join(
     __dirname,
     '../public/albums',
     albumId,
     JSON_FILE_NAME,
   );
 
-  const exist = await fs.pathExists(filepath);
+  const exist = await fs.pathExists(filePath);
   if (!exist) {
     await exports.saveAlbumJson(albumId, initialData);
   }
   try {
-    const data = fs.readJsonSync(filepath);
+    const data = fs.readJsonSync(filePath);
     return data;
   } catch (error) {
     return null;
@@ -96,6 +116,6 @@ exports.loadAlbumJson = async (albumId) => {
  * getAlbumImgs
  */
 exports.getAlbumImgs = (albumId) => {
-  const filepath = path.join(__dirname, '../public/albums', albumId, 'img/*');
-  return exports.getFiles(filepath);
+  const filePath = path.join(__dirname, '../public/albums', albumId, 'img/*');
+  return exports.getFiles(filePath);
 };

@@ -14,6 +14,7 @@ const {
   resetAlbum,
   deleteAlbum,
 } = require('./app');
+const { backupAlbumJson } = require('./util');
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(
@@ -95,13 +96,21 @@ app.post('/albums/:albumId/image', (req, res) => {
 });
 
 /**
+ * backup album
+ */
+app.post('/albums/:albumId/backup', async (req, res) => {
+  const { albumId } = req.params;
+  // バックアップ
+  await backupAlbumJson(albumId);
+  res.json({ backup: true });
+});
+
+/**
  * save album
  */
 app.post('/albums/:albumId/detail', async (req, res) => {
   const { albumId } = req.params;
-  console.log('save album ハンドラ', albumId);
   const result = await saveAlbum(albumId, req.body);
-
   res.json(result);
 });
 

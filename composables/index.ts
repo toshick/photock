@@ -1,7 +1,7 @@
 import type { AppState } from '@/types/apptype';
 import { zeropad } from '@/util/helper';
 
-const usePost = (url: string, body: any) => {
+const usePost = (url: string, body: any = {}) => {
   return useFetch(url, {
     method: 'POST',
     body,
@@ -81,6 +81,16 @@ export const deleteAlbum = async (albumId: string) => {
   if (error.value) {
     return { error: error.value.message };
   }
+  return { ...data?.value };
+};
+
+/**
+ * backupAlbum
+ */
+export const backupAlbum = async (albumId: string) => {
+  const config = useRuntimeConfig();
+  const url = `${config.backendURL}/albums/${albumId}/backup`;
+  const { data } = await usePost(url);
   return { ...data?.value };
 };
 

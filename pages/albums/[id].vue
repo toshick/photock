@@ -29,7 +29,7 @@
         <!-- NO ITEMS -->
         <p
           v-if="itemList.length === 0"
-          class="p-10 text-3xl font-bold text-gray-400"
+          class="pt-4 text-3xl font-bold text-gray-400"
         >
           NO ITEMS
         </p>
@@ -185,12 +185,6 @@
       </div>
     </Overlay>
 
-    <!-- ボトムUI -->
-    <!-- <footer class="bottomUI">
-      <o-button tag="a" size="small" class="btn-right" @click="clearChecked">
-        <span><i class="fas fa-arrow-up mr-2"></i>変更を保存</span>
-      </o-button>
-    </footer> -->
     <!-- 移動 -->
     <div class="bottomUI -moveItem" :class="moveItemClass">
       <a class="link-action mr-8" @click="clearChecked">
@@ -202,35 +196,31 @@
         <span class="">まとめて削除</span>
       </o-button>
       <p class="mx-3">または</p>
-      <FormInput
-        name="moveItem"
+      <o-select
         placeholder="移動先番号"
         size="small"
-        :yup="yup.number().typeError('数字を入力してください')"
-        :val="form.moveIndex"
-        @input="(val:string) => (form.moveIndex = val)"
-        :top-message="true"
-        :hide-error-message="true"
+        @input="onSelectMoveIndex"
+        v-if="selectedItems.length > 0"
       >
-        <template v-slot:right="{ meta, val }">
-          <o-button
-            tag="a"
-            variant="primary"
-            size="small"
-            class="ml-2"
-            @click="bulkMove"
-            :disabled="!meta.valid"
-          >
-            <span class="">の直後にまとめて移動</span>
-          </o-button>
-        </template>
-      </FormInput>
-
-      <!-- <o-button tag="a" size="small" class="btn-right" @click="clearChecked">
-        <span><i class="fas fa-times mr-2"></i>選択解除</span>
-      </o-button> -->
+        <option
+          :value="index"
+          v-for="(_, index) in dragList"
+          :key="`index-${index}`"
+        >
+          {{ index }}
+        </option>
+      </o-select>
+      <o-button
+        tag="a"
+        variant="primary"
+        size="small"
+        class="ml-2"
+        @click="bulkMove"
+        :disabled="form.moveIndex === ''"
+      >
+        <span class="">の直後にまとめて移動</span>
+      </o-button>
     </div>
-    <!-- <LoadingOverlay :active="true" /> -->
   </article>
 </template>
 
@@ -361,6 +351,7 @@ const onUploadFiles = async (e: InputEvent) => {
  * saveDescription
  */
 const saveDescription = async () => {
+  await backupAlbum(albumId);
   // アルバム保存
   const res: any = await saveAlbumDetail(albumId, {
     ...albumData.value,
@@ -396,6 +387,7 @@ const saveAlbumId = async () => {
  * saveItem
  */
 const saveItem = async (item: AlbumItemEdit) => {
+  await backupAlbum(albumId);
   const items = itemList.value.map((i) => {
     if (i.id === item.id) return item;
     return i;
@@ -418,20 +410,6 @@ const saveItem = async (item: AlbumItemEdit) => {
 };
 
 /**
- * reset
- */
-const reset = async () => {
-  // const res = await resetAlbumImage(albumId);
-  // if (res.error) {
-  //   toast.ng(`❗️リセットエラー ${res.error}`);
-  //   return;
-  // }
-  await refresh();
-  toast.ok(`アルバム ${albumId} をリセットしたケロ`);
-  resetting.value = false;
-};
-
-/**
  * del
  */
 const del = async () => {
@@ -450,6 +428,7 @@ const del = async () => {
  *
  */
 const startSaveSortIndex = async () => {
+  await backupAlbum(albumId);
   // アルバム保存
   const res: any = await saveAlbumDetail(albumId, {
     ...albumData.value,
@@ -466,6 +445,7 @@ const startSaveSortIndex = async () => {
  * startSaveSelectedState
  */
 const startSaveSelectedState = async () => {
+  await backupAlbum(albumId);
   const res = await saveSelectedState();
   deleting.value = false;
   if (res.error) {
@@ -550,10 +530,13 @@ const moveBottom = async (index: number) => {
 };
 
 const clearChecked = () => {
-  console.log('せんたくかいじょ', albumRefs.value.length);
   albumRefs.value.forEach((myref: AlbumItemComponent) => {
     myref.resetChecked();
   });
+};
+
+const onSelectMoveIndex = (e) => {
+  form.moveIndex = e.target.value;
 };
 
 type RemoveItem = { item: AlbumItemEdit; remove: boolean };
@@ -562,6 +545,7 @@ type RemoveItem = { item: AlbumItemEdit; remove: boolean };
  * 指定インデックスに選択アイテムを移動
  */
 const bulkMove = async () => {
+  await backupAlbum(albumId);
   const moveIndex = +form.moveIndex + 1;
   const selectedItemIds = selectedItems.value;
   /**
