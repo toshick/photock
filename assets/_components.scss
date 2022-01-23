@@ -14,3 +14,14 @@
 .modal-background {
   background-color: rgba(white, 0.95);
 }
+
+/* ------------------ */
+//  components
+/* ------------------ */
+.o-load {
+  z-index: 40;
+}
+.o-load__overlay {
+  background-color: rgba(white, 0.9);
+  // z-index: 20;
+}

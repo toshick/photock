@@ -20,22 +20,28 @@
           >
         </o-button>
       </o-upload>
-      <!-- <o-button
-        class="mr-3"
-        size="small"
-        variant="primary"
-        @click="resetting = true"
-        >リセット</o-button
-      > -->
       <o-button size="small" variant="primary" @click="deletingAlbum = true"
         ><i class="mr-2 fas fa-skull-crossbones"></i>アルバム削除</o-button
       >
     </GlobalHeader>
-    <div class="flex">
-      <main class="flex-1 flex-grow-auto flex-shrink-0">
-        <!-- <p>itemList {{ itemList.length }} itemListBk {{ itemListBk.length }}</p> -->
+    <div class="flex pt-70px">
+      <main class="flex-1 flex-grow-auto flex-shrink-0 pl-8">
+        <!-- NO ITEMS -->
+        <p
+          v-if="itemList.length === 0"
+          class="p-10 text-3xl font-bold text-gray-400"
+        >
+          NO ITEMS
+        </p>
         <!-- イメージ一覧 -->
-        <section class="container pl-8 pt-8">
+        <section v-else class="py-2">
+          <div class="mb-4">
+            <a @click="checkAllToggle" class="link-action">
+              <i class="fas fa-check"></i>
+              Check All
+            </a>
+          </div>
+
           <draggable
             tag="ul"
             class="imglist"
@@ -62,79 +68,74 @@
           </draggable>
         </section>
       </main>
-      <aside class="w-400px pr-8">
+      <aside class="w-400px pr-8 relative">
         <div class="sticky top-70px">
-          <Stack :space="5">
-            <!-- albumId -->
-            <div class="text-lg">
-              <FormInput
-                name="albumId"
-                label="アルバムID"
-                placeholder="アルバムID"
-                class=""
-                size="small"
-                :yup="$vali.yup(yup.string())"
-                :val="form.albumId"
-                @input="(val:string) => (form.albumId = val)"
-              >
-                <template #right>
+          <div class="">
+            <Stack :space="5">
+              <!-- albumId -->
+              <div class="text-lg">
+                <FormInput
+                  name="albumId"
+                  label="アルバムID"
+                  placeholder="アルバムID"
+                  class=""
+                  size="small"
+                  :yup="$vali.yup(yup.string())"
+                  :val="form.albumId"
+                  @input="(val:string) => (form.albumId = val)"
+                >
+                  <template #right>
+                    <o-button
+                      tag="a"
+                      variant="primary"
+                      size="small"
+                      class="mx-3"
+                      @click="saveAlbumId"
+                      :disabled="!albumIdEditted"
+                    >
+                      <span>変更</span>
+                    </o-button>
+                  </template>
+                </FormInput>
+              </div>
+              <!-- description -->
+              <div class="albumDescription">
+                <FormInput
+                  textarea
+                  expanded
+                  label="アルバム説明"
+                  name="albumDescription"
+                  placeholder="アルバム説明"
+                  size="small"
+                  :height="40"
+                  :yup="$vali.yup(yup.string())"
+                  :val="form.albumDescription"
+                  @input="(val:string) => (form.albumDescription = val)"
+                >
+                </FormInput>
+                <div class="mt-3 text-right flex">
+                  <p class="text-green-500">
+                    <transition name="fade">
+                      <span v-if="savedDescription" class="block">
+                        <i class="fas fa-check"></i>
+                        Saved</span
+                      >
+                    </transition>
+                  </p>
                   <o-button
                     tag="a"
                     variant="primary"
                     size="small"
-                    class="mx-3"
-                    @click="saveAlbumId"
-                    :disabled="!albumIdEditted"
+                    class="ml-auto"
+                    @click="saveDescription"
+                    :disabled="!albumDescriptionEditted"
                   >
-                    <span>変更</span>
+                    <span>保存</span>
                   </o-button>
-                </template>
-              </FormInput>
-            </div>
-            <!-- description -->
-            <div class="albumDescription">
-              <FormInput
-                textarea
-                expanded
-                class="border-1 border-red-500"
-                label="アルバム説明"
-                name="albumDescription"
-                placeholder="アルバム説明"
-                size="small"
-                :height="20"
-                :yup="$vali.yup(yup.string())"
-                :val="form.albumDescription"
-                @input="(val:string) => (form.albumDescription = val)"
-              >
-              </FormInput>
-              <div class="mt-3 text-right flex">
-                <p class="text-green-500">
-                  <transition name="fade">
-                    <span v-if="savedDescription" class="block">
-                      <i class="fas fa-check"></i>
-                      Saved</span
-                    >
-                  </transition>
-                </p>
-                <o-button
-                  tag="a"
-                  variant="primary"
-                  size="small"
-                  class="ml-auto"
-                  @click="saveDescription"
-                  :disabled="!albumDescriptionEditted"
-                >
-                  <span>保存</span>
-                </o-button>
+                </div>
               </div>
-            </div>
-            <div>
-              <a @click="checkAllToggle" class="link-action">
-                <i class="fas fa-check"></i>
-                Check All
-              </a>
-            </div>
-          </Stack>
+            </Stack>
+          </div>
         </div>
       </aside>
     </div>
@@ -192,7 +193,15 @@
     </footer> -->
     <!-- 移動 -->
     <div class="bottomUI -moveItem" :class="moveItemClass">
+      <a class="link-action mr-8" @click="clearChecked">
+        <span><i class="fas fa-times mr-2"></i>選択解除</span>
+      </a>
       <p class="pr-3">選択した {{ selectedItems.length }} 個を</p>
+
+      <o-button tag="a" variant="primary" size="small" @click="deleting = true">
+        <span class="">まとめて削除</span>
+      </o-button>
+      <p class="mx-3">または</p>
       <FormInput
         name="moveItem"
         placeholder="移動先番号"
@@ -216,15 +225,12 @@
           </o-button>
         </template>
       </FormInput>
-      <p class="mx-3">または</p>
-      <o-button tag="a" variant="primary" size="small" @click="deleting = true">
-        <span class="">まとめて削除</span>
-      </o-button>
 
-      <o-button tag="a" size="small" class="btn-right" @click="clearChecked">
+      <!-- <o-button tag="a" size="small" class="btn-right" @click="clearChecked">
         <span><i class="fas fa-times mr-2"></i>選択解除</span>
-      </o-button>
+      </o-button> -->
     </div>
+    <!-- <LoadingOverlay :active="true" /> -->
   </article>
 </template>
 
@@ -246,7 +252,7 @@ type AlbumItemComponent = InstanceType<typeof AlbumItem>;
 const router = useRouter();
 const oruga = inject('oruga');
 const toast = createToast(oruga);
-const loadingOverlay = createLoadingOverlay(oruga);
+const loadingOverlay = createLoadingOverlay();
 const r = useRoute();
 const albumId = r.params.id as string;
 const { albumData, refresh } = await useAlbumDetail(albumId);
@@ -508,10 +514,9 @@ const saveSelectedState = async () => {
       });
     }, Promise.resolve());
   } catch (error) {
+    loadingOverlay.close();
     return { error: error.message };
   }
-
-  loadingOverlay.close();
 
   // アルバム保存
   const res: any = await saveAlbumDetail(albumId, {
@@ -519,8 +524,10 @@ const saveSelectedState = async () => {
     items: itemsActive.map((i) => getAlbumItemForSend(i)),
   });
   if (res.error) {
+    loadingOverlay.close();
     return res.error;
   }
+  loadingOverlay.close();
   return { removed: true };
 };
 
@@ -696,8 +703,9 @@ const saveIndexBtnClass = computed(() => {
 .bottomUI {
   display: flex;
   align-items: center;
-  justify-content: center;
-  background-color: #ffefc8;
+  justify-content: flex-start;
+  background-color: #f7c505;
+  border-bottom: solid 1px #fff;
   padding: 20px 30px 20px;
   box-shadow: 0 0 4px 2px rgba(black, 0.13);
   width: 100%;

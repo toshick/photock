@@ -24,7 +24,8 @@
 header {
   background-color: var(--primary-color);
   background-image: url('/img/60-lines.png');
-  position: sticky;
+  width: 100%;
+  position: fixed;
   top: 0;
   z-index: 5;
   border-bottom: solid 1px #a13838;

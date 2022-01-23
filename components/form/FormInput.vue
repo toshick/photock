@@ -134,11 +134,12 @@ const styles = computed<Object>(() => ({
 <style lang="scss">
 .field {
   position: relative;
-  height: var(--form-height-val);
-  // display: inline-block;
-  // margin: 0;
+
   & > .label {
     font-weight: normal;
+  }
+  & > .control {
+    height: var(--form-height-val);
   }
   &.-top-message {
     .help {
@@ -162,8 +163,5 @@ const styles = computed<Object>(() => ({
   &:hover {
     border: solid 1px #fff;
   }
-}
-.control {
-  // height: 100%;
 }
 </style>

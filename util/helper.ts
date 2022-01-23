@@ -1,3 +1,6 @@
+import { createVNode, render } from 'vue';
+import LoadingOverlay from '@/components/LoadingOverlay.vue';
+
 export const BACKEND_URL = 'http://localhost:9000';
 
 export const readFile = (file: File) => {
@@ -20,7 +23,7 @@ export const createToast = (oruga) => {
       oruga.notification.open({
         message: msg,
         rootClass: 'toast-notification',
-        position: 'top-left',
+        position: 'bottom-left',
         variant: 'success',
         duration: 3000,
       });
@@ -29,7 +32,7 @@ export const createToast = (oruga) => {
       oruga.notification.open({
         message: msg,
         rootClass: 'toast-notification',
-        position: 'top-left',
+        position: 'bottom-left',
         variant: 'danger',
         duration: 3000,
       });
@@ -37,12 +40,28 @@ export const createToast = (oruga) => {
   };
 };
 
-export const createLoadingOverlay = (oruga) => {
+export const createLoadingOverlay = () => {
+  let $target = null;
+  let vnode = null;
+  const prop = { active: true };
   return {
     open() {
-      const loadingComponent = oruga.loading.open();
+      $target = document.createElement('div');
+      document.getElementById('__nuxt').appendChild($target);
+      vnode = createVNode(LoadingOverlay, prop);
+      render(vnode, $target);
     },
-    close() {},
+    close() {
+      if (!vnode) return;
+
+      vnode.component.props.active = false;
+      setTimeout(() => {
+        render(null, $target);
+        $target.parentNode.removeChild($target);
+        vnode = null;
+        $target = null;
+      }, 500);
+    },
   };
 };
 

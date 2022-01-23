@@ -1,10 +1,11 @@
 <template>
   <transition name="fade">
-    <o-modal :active="active" class="modal-loading" :canCancel="[]" ref="modal">
-      <p style="text-align: center">
+    <div v-if="active" class="loading">
+      <div class="loading-bg" />
+      <div class="loading-cont">
         <img src="/img/gohan.png" />
-      </p>
-    </o-modal>
+      </div>
+    </div>
   </transition>
 </template>
 
@@ -15,32 +16,35 @@ const props = defineProps({
     default: false,
   },
 });
-const modal = ref(null);
-//----------------------
-// state
-//----------------------
-const s = reactive({
-  name: '',
-  active: false,
-});
-const active = computed(() => s.active);
-const doClose = () => {
-  if (modal && modal.value?.close) {
-    modal.value?.close();
-    s.active = false;
-  }
-};
-watchEffect(() => {
-  if (props.active) {
-    s.active = props.active;
-  } else {
-    doClose();
-  }
-});
+
+const active = computed(() => props.active);
 </script>
 
-<style lang="scss">
-.modal-loading > .animation-content {
-  pointer-events: none;
+<style scoped lang="scss">
+.loading {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 40;
+  width: 100vw;
+  height: 100vh;
+}
+.loading-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(white, 0.9);
+}
+.loading-cont {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
 }
 </style>

@@ -8,12 +8,12 @@
 
         <FormInput
           name="albumId"
-          placeholder="アルバムID（20文字以下）"
+          placeholder="アルバムID（30文字以下）"
           label="アルバム作成"
           class="px-3 w-300px"
           size="small"
           :yup="
-            $vali.yup(yup.string(), $vali.max(20), $vali.id(), $vali.required())
+            $vali.yup(yup.string(), $vali.max(30), $vali.id(), $vali.required())
           "
           expanded
         >
@@ -30,7 +30,7 @@
       </o-dropdown>
     </GlobalHeader>
 
-    <section class="container py-3">
+    <section class="container pt-70px">
       <p class="py-3 text-lg">アルバム一覧</p>
 
       <AlbumList :albums="albums" @clickAlbum="onClickAlbum" />

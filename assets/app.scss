@@ -139,6 +139,11 @@ $modal-background-background-color: rgba(white, 0.8);
     top: 20px;
     left: 20px;
   }
+  &.is-bottom-left {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+  }
 }
 
 /* ------------------ */
