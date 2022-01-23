@@ -126,7 +126,14 @@ app.post('/albums/:albumId/id', async (req, res) => {
 app.delete('/albums/:albumId/image/:itemId', async (req, res) => {
   const { albumId, itemId } = req.params;
   const result = await loadAlbum(albumId);
+  if (result.error) {
+    res.json(result);
+  }
   const { items } = result;
+  if (!items) {
+    res.json({ error: 'no items' });
+  }
+
   const find = items.find((i) => {
     return i.id === itemId;
   });

@@ -6,7 +6,8 @@
   --second-color: #ffff8c;
   --danger-color: #ff3333;
   // --input-bg-color: rgba(#e7796a, 0.1);
-  --sack-space: 4px;
+  --stack-space: 4px;
+  --form-height-unit: 4px;
 }
 
 /* ------------------ */
@@ -162,6 +163,13 @@ $modal-background-background-color: rgba(white, 0.8);
   & > i {
     position: relative;
     z-index: 1;
+  }
+}
+.link-action {
+  color: $primary;
+  &:hover {
+    color: $primary;
+    opacity: 0.8;
   }
 }
 

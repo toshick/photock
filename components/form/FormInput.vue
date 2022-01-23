@@ -3,6 +3,7 @@
     :message="props.hideErrorMessage ? '' : errorMessage"
     :label="label"
     :class="myClass"
+    :style="styles"
   >
     <o-input
       v-model="myval"
@@ -75,6 +76,10 @@ const props = defineProps({
     type: Object as PropType<yup.AnySchema>,
     default: null,
   },
+  height: {
+    type: Number,
+    default: 0,
+  },
 });
 const myClass: { [key: string]: boolean } = {
   myform: true,
@@ -118,11 +123,18 @@ const onIconClick = () => {
     emit('icon');
   }
 };
+const styles = computed<Object>(() => ({
+  '--form-height-val':
+    props.height > 0
+      ? `calc(var(--form-height-unit) * ${props.height})`
+      : 'auto',
+}));
 </script>
 
 <style lang="scss">
 .field {
   position: relative;
+  height: var(--form-height-val);
   // display: inline-block;
   // margin: 0;
   & > .label {
@@ -142,13 +154,16 @@ const onIconClick = () => {
   color: var(--danger-color);
 }
 .input {
-  // background: linear-gradient(#fae9e8, #f7dbd9);
   background-color: white;
   box-shadow: 0 2px 3px 1px rgba(#000, 0.13);
   border: solid 1px #fff;
+  height: 100%;
 
   &:hover {
     border: solid 1px #fff;
   }
+}
+.control {
+  // height: 100%;
 }
 </style>

@@ -15,12 +15,12 @@ const klass = {
   stack: true,
 };
 const styles = computed<Object>(() => ({
-  '--sack-space-val': `calc(var(--sack-space) * ${props.space})`,
+  '--stack-space-val': `calc(var(--stack-space) * ${props.space})`,
 }));
 </script>
 
 <style lang="scss">
 .stack > * + * {
-  margin-block-start: var(--sack-space-val);
+  margin-block-start: var(--stack-space-val);
 }
 </style>

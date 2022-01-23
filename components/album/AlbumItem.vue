@@ -16,6 +16,7 @@
         :top-message="true"
         expanded
         @input="(val:string) => (form.title = val)"
+        @keydown="onKeyDown"
       >
       </FormInput>
       <p class="ml-2">
@@ -39,12 +40,11 @@
             v-if="editted"
             class="btn-save iconbutton"
             @click="
-              () =>
-                $emit('save', {
-                  ...item,
-                  title: form.title,
-                  description: form.description,
-                })
+              $emit('save', {
+                ...item,
+                title: form.title,
+                description: form.description,
+              })
             "
             ><i class="fas fa-arrow-up"></i
           ></a>
@@ -88,6 +88,7 @@
           :val="form.description"
           expanded
           @input="(val:string) => (form.description = val)"
+          @keydown="onKeyDown"
         >
         </FormInput>
       </div>
@@ -169,11 +170,27 @@ const revert = () => {
 const resetChecked = () => {
   checked.value = false;
 };
+const forceChecked = () => {
+  checked.value = true;
+};
 const showSaved = () => {
   saved.value = true;
   setTimeout(() => {
     saved.value = false;
   }, 1000);
+};
+const onKeyDown = (e: any) => {
+  if (e.metaKey && e.keyCode === 13) {
+    e.preventDefault();
+    saveData();
+  }
+};
+const saveData = () => {
+  emit('save', {
+    ...props.item,
+    title: form.title,
+    description: form.description,
+  });
 };
 
 watch(
@@ -183,7 +200,7 @@ watch(
   },
 );
 
-defineExpose({ resetChecked, showSaved });
+defineExpose({ resetChecked, forceChecked, showSaved });
 </script>
 
 <style scoped lang="scss">
@@ -212,6 +229,7 @@ defineExpose({ resetChecked, showSaved });
     }
   }
   &-body {
+    position: relative;
     border-radius: 4px;
     overflow: hidden;
     background-color: white;

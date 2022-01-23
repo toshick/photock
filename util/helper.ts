@@ -37,8 +37,28 @@ export const createToast = (oruga) => {
   };
 };
 
+export const createLoadingOverlay = (oruga) => {
+  return {
+    open() {
+      const loadingComponent = oruga.loading.open();
+    },
+    close() {},
+  };
+};
+
 export const zeropad = (num: number | string, len: number) =>
   String(num).padStart(len, '0');
+
+/**
+ * sleep
+ */
+export const sleep = (millisecond: number): Promise<void> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve();
+    }, millisecond);
+  });
+};
 
 /**
  * shuffle

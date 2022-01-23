@@ -129,11 +129,14 @@ exports.listAlbums = async function () {
 exports.removeAlbumItem = async function (albumId, itemId) {
   // load data first
   const loaded = await loadAlbumJson(albumId);
+  if (!loaded) {
+    return { error: 'can not load Album json (removeAlbumItem)' };
+  }
   const items = loaded.items || [];
   // find target
   const item = await getAlbumItem(albumId, itemId);
-  if (!item) {
-    return { error: 'can not find Album item', itemId };
+  if (item.error) {
+    return { error: 'can not find Album item' };
   }
   const targetPath = path.join(pathPublic, item.img);
   const resultRemove = await removeFiles([targetPath]);
@@ -191,10 +194,10 @@ exports.deleteAlbum = async function (albumId) {
 async function getAlbumItem(albumId, itemId) {
   const loaded = await loadAlbumJson(albumId);
   if (!loaded) {
-    return { error: 'can not read json for', albumId };
+    return { error: 'can not read json for' };
   }
   const items = loaded.items || [];
   const find = items.find((i) => i.id === itemId);
   if (find) return find;
-  return null;
+  return { error: 'can not find item (getAlbumItem)' };
 }

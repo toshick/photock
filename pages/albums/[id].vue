@@ -51,8 +51,8 @@
                   :id="element.id"
                   :index="index"
                   :item="element"
-                  @save="saveItem"
                   :saved="element.saved"
+                  @save="saveItem"
                   @move-top="() => moveTop(index)"
                   @move-bottom="() => moveBottom(index)"
                   @checked="(checked) => (element.checked = checked)"
@@ -96,10 +96,12 @@
               <FormInput
                 textarea
                 expanded
+                class="border-1 border-red-500"
                 label="アルバム説明"
                 name="albumDescription"
                 placeholder="アルバム説明"
                 size="small"
+                :height="20"
                 :yup="$vali.yup(yup.string())"
                 :val="form.albumDescription"
                 @input="(val:string) => (form.albumDescription = val)"
@@ -125,6 +127,12 @@
                   <span>保存</span>
                 </o-button>
               </div>
+            </div>
+            <div>
+              <a @click="checkAllToggle" class="link-action">
+                <i class="fas fa-check"></i>
+                Check All
+              </a>
             </div>
           </Stack>
         </div>
@@ -224,7 +232,13 @@
 import * as yup from 'yup';
 import draggable from 'vuedraggable';
 import type { AlbumItem as Item, AlbumItemEdit } from '@/types/apptype';
-import { createToast, asort, zeropad } from '@/util/helper';
+import {
+  createToast,
+  createLoadingOverlay,
+  asort,
+  zeropad,
+  sleep,
+} from '@/util/helper';
 import AlbumItem from '@/components/album/AlbumItem.vue';
 
 type AlbumItemComponent = InstanceType<typeof AlbumItem>;
@@ -232,6 +246,7 @@ type AlbumItemComponent = InstanceType<typeof AlbumItem>;
 const router = useRouter();
 const oruga = inject('oruga');
 const toast = createToast(oruga);
+const loadingOverlay = createLoadingOverlay(oruga);
 const r = useRoute();
 const albumId = r.params.id as string;
 const { albumData, refresh } = await useAlbumDetail(albumId);
@@ -293,6 +308,18 @@ const setAlbumRef = (a: AlbumItemComponent) => {
   }
 };
 
+const checkAllToggle = (e) => {
+  const checkedAll = itemList.value.every((i: AlbumItemEdit) => {
+    return i.checked === true;
+  });
+  albumRefs.value.forEach((myref: AlbumItemComponent) => {
+    if (checkedAll) {
+      myref.resetChecked();
+    } else {
+      myref.forceChecked();
+    }
+  });
+};
 const onSortItem = () => {
   itemList.value = getAlbumItemsWithIndex(dragList.value);
 };
@@ -468,16 +495,24 @@ const saveSelectedState = async () => {
   const itemsActive = items.filter((i: AlbumItemEdit) => !!i.checked === false);
   const itemsRemove = items.filter((i: AlbumItemEdit) => !!i.checked === true);
 
+  loadingOverlay.open();
+
   // アイテム削除
-  const reslist = await Promise.all(
-    itemsRemove.map((i: AlbumItemEdit) => {
-      return removeAlbumImage(albumId, i.id);
-    }),
-  );
-  const errors = reslist.filter((res) => !!res.error).map((res) => res.error);
-  if (errors.length > 0) {
-    return { error: errors[0] };
+  try {
+    await itemsRemove.reduce((ps: Promise<any>, i: AlbumItemEdit) => {
+      return ps.then(async () => {
+        const res = await removeAlbumImage(albumId, i.id);
+        if (res.error) {
+          throw new Error(res.error);
+        }
+      });
+    }, Promise.resolve());
+  } catch (error) {
+    return { error: error.message };
   }
+
+  loadingOverlay.close();
+
   // アルバム保存
   const res: any = await saveAlbumDetail(albumId, {
     ...albumData.value,
