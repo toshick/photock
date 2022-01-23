@@ -134,6 +134,42 @@
                   </o-button>
                 </div>
               </div>
+              <!-- まとめ -->
+              <div class="albumConclusion">
+                <FormInput
+                  textarea
+                  expanded
+                  label="アルバムまとめ"
+                  name="albumConclusion"
+                  placeholder="アルバムまとめ"
+                  size="small"
+                  :height="40"
+                  :yup="$vali.yup(yup.string())"
+                  :val="form.albumConclusion"
+                  @input="(val:string) => (form.albumConclusion = val)"
+                >
+                </FormInput>
+                <div class="mt-3 text-right flex">
+                  <p class="text-green-500">
+                    <transition name="fade">
+                      <span v-if="savedConclusion" class="block">
+                        <i class="fas fa-check"></i>
+                        Saved</span
+                      >
+                    </transition>
+                  </p>
+                  <o-button
+                    tag="a"
+                    variant="primary"
+                    size="small"
+                    class="ml-auto"
+                    @click="saveConclusion"
+                    :disabled="!albumConclusionEditted"
+                  >
+                    <span>保存</span>
+                  </o-button>
+                </div>
+              </div>
             </Stack>
           </div>
         </div>
@@ -247,18 +283,20 @@ const r = useRoute();
 const albumId = r.params.id as string;
 const { albumData, refresh } = await useAlbumDetail(albumId);
 
-// console.log('albumData', JSON.stringify(albumData.value.items));
+console.log('albumData', JSON.stringify(Object.keys(albumData.value)));
 
 const itemList = ref([]);
 let itemListBk = [];
 const dragList = ref([]);
 const savedDescription = ref(false);
+const savedConclusion = ref(false);
 const resetting = ref(false);
 const deletingAlbum = ref(false);
 const deleting = ref(false);
 const form = reactive({
   albumId,
   albumDescription: albumData.value.albumDescription || '',
+  albumConclusion: albumData.value.albumConclusion || '',
   moveIndex: '',
 });
 const albumIdEditted = computed(() => {
@@ -266,6 +304,9 @@ const albumIdEditted = computed(() => {
 });
 const albumDescriptionEditted = computed(() => {
   return form.albumDescription !== albumData.value.albumDescription;
+});
+const albumConclusionEditted = computed(() => {
+  return form.albumConclusion !== albumData.value.albumConclusion;
 });
 
 const selectedItems = computed(() => {
@@ -366,6 +407,28 @@ const saveDescription = async () => {
   savedDescription.value = true;
   setTimeout(() => {
     savedDescription.value = false;
+  }, 2000);
+};
+
+/**
+ * saveConclusion
+ */
+const saveConclusion = async () => {
+  await backupAlbum(albumId);
+  // アルバム保存
+  const res: any = await saveAlbumDetail(albumId, {
+    ...albumData.value,
+    albumConclusion: form.albumConclusion,
+  });
+
+  if (res.error) {
+    toast.ng(`❗️まとめ保存エラー ${res.error}`);
+    return;
+  }
+  await refresh();
+  savedConclusion.value = true;
+  setTimeout(() => {
+    savedConclusion.value = false;
   }, 2000);
 };
 

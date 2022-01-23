@@ -107,7 +107,7 @@ exports.loadAlbum = async function (albumId) {
     }
   });
 
-  return { items, albumDescription: loaded.albumDescription || '' };
+  return { ...loaded, items };
 };
 
 /**
