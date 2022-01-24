@@ -13,6 +13,7 @@ const {
   removeAlbumItem,
   resetAlbum,
   deleteAlbum,
+  exportAlbum,
 } = require('./app');
 const { backupAlbumJson } = require('./util');
 const app = express();
@@ -103,6 +104,16 @@ app.post('/albums/:albumId/backup', async (req, res) => {
   // バックアップ
   await backupAlbumJson(albumId);
   res.json({ backup: true });
+});
+
+/**
+ * export
+ */
+app.post('/albums/:albumId/export', async (req, res) => {
+  const { albumId } = req.params;
+  await exportAlbum(albumId);
+
+  res.json({ export: true });
 });
 
 /**

@@ -1,3 +1,4 @@
+const { execSync } = require('child_process');
 const fs = require('fs-extra');
 const uuid = require('uuid');
 const path = require('path');
@@ -56,7 +57,6 @@ exports.changeAlbumId = async function (albumId, body) {
   if (currentData.error) {
     return currentData.error;
   }
-
   const { newId } = body;
   if (!newId) {
     return { error: 'target albumId is not provided' };
@@ -79,7 +79,6 @@ exports.changeAlbumId = async function (albumId, body) {
   if (data2.error) {
     return data2.error;
   }
-
   return { renamed: true, newId };
 };
 
@@ -90,7 +89,6 @@ exports.loadAlbum = async function (albumId) {
   if (!albumId) {
     return { error: 'albumId is not provided' };
   }
-
   const loaded = await loadAlbumJson(albumId);
   if (!loaded) {
     return { error: 'can not read json for', albumId };
@@ -106,7 +104,6 @@ exports.loadAlbum = async function (albumId) {
       items.push({ img: imgpath, id: uuid.v4() });
     }
   });
-
   return { ...loaded, items };
 };
 
@@ -173,7 +170,6 @@ exports.resetAlbum = async function (albumId) {
   if (res.error) {
     return res.error;
   }
-
   return { ok: true };
 };
 
@@ -186,6 +182,67 @@ exports.deleteAlbum = async function (albumId) {
   if (resultRemove.error) {
     return resultRemove;
   }
+  return { ok: true };
+};
+
+/**
+ * exportAlbum
+ */
+exports.exportAlbum = async function (albumId) {
+  const data = await exports.loadAlbum(albumId);
+
+  const filePath = path.join(__dirname, `../public/albums/${albumId}`);
+  const distPath = path.join(__dirname, `../dist/${albumId}`);
+  fs.ensureDirSync(distPath);
+  fs.ensureDirSync(path.join(distPath, 'img'));
+  // try {
+  //   fs.copySync(filePath, distPath, { overwrite: true });
+  // } catch (error) {
+  //   return { error: error.message };
+  // }
+
+  // sips
+  const sipsResult = execSync(
+    `sips -Z 1280 ${path.join(filePath, 'img/*')} -o ${path.join(
+      distPath,
+      'img',
+    )}`,
+  );
+
+  try {
+    // index.html
+    let html = fs.readFileSync(
+      path.join(__dirname, `../album-template/public/index.html`),
+      'utf-8',
+    );
+    html = html.replace(/\{album-title\}/g, data.albumTitle);
+    html = html.replace(/\{album-id\}/g, albumId);
+    fs.writeFileSync(
+      path.join(__dirname, `../dist/${albumId}/index.html`),
+      html,
+    );
+
+    // css
+    fs.copySync(
+      path.join(__dirname, `../album-template/public/css`),
+      path.join(__dirname, `../dist/${albumId}/css`),
+      { overwrite: true },
+    );
+    // parts
+    fs.copySync(
+      path.join(__dirname, `../album-template/public/parts`),
+      path.join(__dirname, `../dist/${albumId}/parts`),
+      { overwrite: true },
+    );
+  } catch (error) {
+    return { error: error.message };
+  }
+
+  // imageoptim
+  // const imageoptimResult = execSync(
+  //   `imageoptim ${path.join(distPath, 'img/*')}`,
+  // );
+  // console.log(`sipsResult: ${imageoptimResult.toString()}`);
 
   return { ok: true };
 };

@@ -27,7 +27,7 @@
       <!-- イメージ -->
       <div class="imgitem-img">
         <figure class="imgitem-imgholder">
-          <img :src="item.img" alt="" lazy loading="lazy" />
+          <img :src="item.img" :alt="item.id" loading="lazy" />
           <!-- 右側 -->
           <nav class="imgitem-ui imgitem-ui-r">
             <!-- もどすボタン -->

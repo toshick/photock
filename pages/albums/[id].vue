@@ -23,6 +23,13 @@
       <o-button size="small" variant="primary" @click="deletingAlbum = true"
         ><i class="mr-2 fas fa-skull-crossbones"></i>アルバム削除</o-button
       >
+      <o-button
+        class="ml-3"
+        size="small"
+        variant="primary"
+        @click="startExportAlbum"
+        ><i class="mr-2 fas fa-arrow-circle-down"></i>エクスポート</o-button
+      >
     </GlobalHeader>
     <div class="flex pt-70px">
       <main class="flex-1 flex-grow-auto flex-shrink-0 pl-8">
@@ -98,6 +105,41 @@
                   </template>
                 </FormInput>
               </div>
+              <!-- albumTitle -->
+              <div class="text-lg">
+                <FormInput
+                  name="albumTitle"
+                  label="アルバムタイトル"
+                  placeholder="アルバムタイトル"
+                  class=""
+                  size="small"
+                  expanded
+                  :yup="$vali.yup(yup.string())"
+                  :val="form.albumTitle"
+                  @input="(val:string) => (form.albumTitle = val)"
+                >
+                  <template #right>
+                    <o-button
+                      tag="a"
+                      variant="primary"
+                      size="small"
+                      class="mx-3"
+                      @click="saveTitle"
+                      :disabled="!albumTitleEditted"
+                    >
+                      <span>変更</span>
+                    </o-button>
+                  </template>
+                </FormInput>
+                <p class="text-green-500">
+                  <transition name="fade">
+                    <span v-if="savedTitle" class="block">
+                      <i class="fas fa-check"></i>
+                      Saved</span
+                    >
+                  </transition>
+                </p>
+              </div>
               <!-- description -->
               <div class="albumDescription">
                 <FormInput
@@ -143,7 +185,7 @@
                   name="albumConclusion"
                   placeholder="アルバムまとめ"
                   size="small"
-                  :height="40"
+                  :height="60"
                   :yup="$vali.yup(yup.string())"
                   :val="form.albumConclusion"
                   @input="(val:string) => (form.albumConclusion = val)"
@@ -288,6 +330,7 @@ console.log('albumData', JSON.stringify(Object.keys(albumData.value)));
 const itemList = ref([]);
 let itemListBk = [];
 const dragList = ref([]);
+const savedTitle = ref(false);
 const savedDescription = ref(false);
 const savedConclusion = ref(false);
 const resetting = ref(false);
@@ -297,10 +340,14 @@ const form = reactive({
   albumId,
   albumDescription: albumData.value.albumDescription || '',
   albumConclusion: albumData.value.albumConclusion || '',
+  albumTitle: albumData.value.albumTitle || '',
   moveIndex: '',
 });
 const albumIdEditted = computed(() => {
   return form.albumId !== albumId;
+});
+const albumTitleEditted = computed(() => {
+  return form.albumTitle !== albumData.value.albumTitle;
 });
 const albumDescriptionEditted = computed(() => {
   return form.albumDescription !== albumData.value.albumDescription;
@@ -386,6 +433,28 @@ const onUploadFiles = async (e: InputEvent) => {
     return res.error;
   }
   toast.ok('アップロードしたケロ');
+};
+
+/**
+ * saveTitle
+ */
+const saveTitle = async () => {
+  await backupAlbum(albumId);
+  // アルバム保存
+  const res: any = await saveAlbumDetail(albumId, {
+    ...albumData.value,
+    albumTitle: form.albumTitle,
+  });
+
+  if (res.error) {
+    toast.ng(`❗️タイトル保存エラー ${res.error}`);
+    return;
+  }
+  await refresh();
+  savedTitle.value = true;
+  setTimeout(() => {
+    savedTitle.value = false;
+  }, 2000);
 };
 
 /**
@@ -533,6 +602,17 @@ const getAlbumItemsWithIndex = (ary: AlbumItemEdit[]) => {
   return ary.map((i: AlbumItemEdit, index: number) => {
     return { ...i, index: zeropad(index, 5) };
   });
+};
+
+const startExportAlbum = async () => {
+  loadingOverlay.open();
+  const res = await exportAlbum(albumId);
+  if (res.error) {
+    toast.ng('エクスポートに失敗');
+    return;
+  }
+  loadingOverlay.close();
+  toast.ok('エクスポートを完了');
 };
 
 /**

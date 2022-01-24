@@ -4,7 +4,10 @@
     "dev": "nuxi dev",
     "build": "nuxi build",
     "start": "node .output/server/index.mjs",
-    "typecheck": "nuxi typecheck"
+    "typecheck": "nuxi typecheck",
+    "template": "npm run template:dev & npm run template:scss",
+    "template:dev": "cd album-template/public && reload -b",
+    "template:scss": "sass --watch album-template/public/css"
   },
   "devDependencies": {
     "eslint": "^8.5.0",

@@ -1,0 +1,58 @@
+@import url("./destyle.css");
+:root {
+  --first-color: #16f;
+  --second-color: #ff7;
+}
+
+html {
+  color: #999;
+}
+
+.container {
+  padding: 20px;
+}
+
+/* ----------------- */
+/* lines */
+/* ----------------- */
+.lines {
+  margin: 0 auto;
+  padding: 0 3px;
+}
+
+.line-item {
+  padding: 3px;
+  font-size: 12px;
+}
+
+.line-item-img {
+  overflow: hidden;
+}
+
+.line-item-img img {
+  display: block;
+  object-fit: cover;
+  object-position: center;
+}
+
+.line-item.-size-1 .line-item-img img {
+  max-height: 220px;
+  width: 100%;
+}
+
+.line-item.-size-2 .line-item-img img {
+  max-height: 240px;
+  width: 100%;
+}
+
+.line-item-txt {
+  margin: 6px 0;
+}
+
+footer {
+  background-color: #333;
+  padding: 60px 0;
+  text-align: center;
+}
+
+/*# sourceMappingURL=album.css.map */

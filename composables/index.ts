@@ -71,6 +71,20 @@ export const saveAlbumDetail = async (albumId: string, albumData: object) => {
 };
 
 /**
+ * exportAlbum
+ */
+export const exportAlbum = async (albumId: string) => {
+  const config = useRuntimeConfig();
+  const { data, pending, refresh, error } = await usePost(
+    `${config.backendURL}/albums/${albumId}/export`,
+  );
+  if (error.value) {
+    return { error: error.value.message };
+  }
+  return { ...data?.value };
+};
+
+/**
  * deleteAlbum
  */
 export const deleteAlbum = async (albumId: string) => {

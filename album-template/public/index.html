@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <title>せかいのアルバム | {album-title}</title>
+    <script src="//unpkg.com/alpinejs" defer></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/album.css" />
+  </head>
+  <body>
+    <main x-data="app()" x-cloak>
+      <template x-if="loadedJson">
+        <div class="view">
+          <!-- left menu -->
+          <section class="container">
+            <h1 class="py-3 text-3xl">{album-title}</h1>
+            <h2 class="py-3 text-lg">{album-id}</h2>
+            <p class="py-3" x-html="albumDescription"></p>
+          </section>
+          <!-- list -->
+          <article class="lines">
+            <div class="flex">
+              <template
+                x-for="(line, index) in itemLines"
+                :key="`line-${index}`"
+              >
+                <div class="item-line">
+                  <template
+                    x-for="(itm, index2) in line"
+                    :key="`item-${index2}`"
+                  >
+                    <div class="line-item" :class="itm.size">
+                      <!-- <p x-text="itm.size"></p> -->
+                      <div class="line-item-img">
+                        <img
+                          x-bind="{src: itm.img, alt: `image ${itm.id}`}"
+                          loading="lazy"
+                        />
+                      </div>
+                      <p
+                        x-html="getText(itm.description)"
+                        class="line-item-txt"
+                      ></p>
+                    </div>
+                  </template>
+                </div>
+              </template>
+            </div>
+          </article>
+          <section class="container">
+            <h1 class="py-3 text-3xl">まとめ</h1>
+            <p class="py-3" x-html="albumConclusion"></p>
+          </section>
+        </div>
+      </template>
+      <footer>copyright せかいのとしっく</footer>
+    </main>
+    <script>
+      /**
+       * loadData
+       */
+      const loadData = () => {
+        return new Promise((resolve) => {
+          // const script = document.createElement('script');
+          // script.onload = function () {
+          //   resolve(items);
+          // };
+          // script.src = './data.js';
+          // document.documentElement.firstChild.appendChild(script);
+          fetch('data.json')
+            .then((response) => response.json())
+            .then((json) => {
+              const items = json.items.map((item, index) => {
+                const img = item.img.replace(/.+img\//, 'img/');
+                const size = Math.ceil(Math.random() * 3);
+                const loading = index < 5 ? 'eager' : 'lazy';
+                return { ...item, img, size: `-size-${size}`, loading };
+              });
+              const data = { ...json, items };
+              console.log('data', data);
+              resolve(data);
+            });
+        });
+      };
+      /**
+       * app
+       */
+      const app = () => {
+        return {
+          loadedJson: null,
+          items: [],
+          itemLines: [],
+          winWidth: window.innerWidth,
+          init() {
+            const hasLoading = 'loading' in HTMLImageElement.prototype;
+            console.log('Loading機能', hasLoading);
+
+            /**
+             * keydown
+             */
+            window.addEventListener('keydown', (e) => {
+              if (e.code === 'Escape') {
+                this.openPreview(null);
+              }
+              if (e.code === 'ArrowRight') {
+                this.selectItemNext();
+              }
+              if (e.code === 'ArrowLeft') {
+                this.selectItemPrev();
+              }
+            });
+            window.addEventListener('resize', () => {
+              this.winWidth = window.innerWidth;
+            });
+            /**
+             * watch hash
+             */
+            // this.$watch('hash', (value) => {
+            //   location.hash = value;
+            //   if (!value) {
+            //     this.preview = null;
+            //     return;
+            //   }
+            //   const item = this.allItems.find((i) => i.id === value) || null;
+            //   this.preview = null;
+            //   this.$nextTick(() => {
+            //     this.preview = item;
+            //   });
+            // });
+            /**
+             * load json
+             */
+            loadData().then((data) => {
+              this.loadedJson = data;
+              this.items = data.items;
+
+              // first view
+              // this.$nextTick(() => {});
+            });
+          },
+          /**
+           * getter
+           */
+          get albumDescription() {
+            return `${this.loadedJson.albumDescription.replace(
+              /[\r\n]/g,
+              '<br>',
+            )}`;
+          },
+          get albumConclusion() {
+            return `${this.loadedJson.albumConclusion.replace(
+              /[\r\n]/g,
+              '<br>',
+            )}`;
+          },
+          get itemLines() {
+            return this.getLinesFor(this.lineNum);
+          },
+          get isMobile() {
+            return this.winWidth <= 480;
+          },
+          get isTablet() {
+            return this.winWidth <= 960;
+          },
+          get lineNum() {
+            if (this.isMobile) return 1;
+            if (this.isTablet) return 2;
+            return 3;
+          },
+          getImgSrc(src) {
+            // return '';
+          },
+          getLinesFor(linesCount) {
+            if (linesCount === 1) {
+              return [this.items];
+            }
+            const lines = [];
+            this.items.forEach((i, index) => {
+              const num = index % linesCount;
+              if (!lines[num]) lines[num] = [];
+              lines[num].push(i);
+            });
+            return lines;
+          },
+          getText(str = '') {
+            return str.replace(/[\r\n]/g, '<br>');
+          },
+          // selectItemNext() {
+          //   if (!this.preview) return;
+          //   const nextIndex = this.preview.index + 1;
+          //   const next = this.allItems[nextIndex];
+          //   if (next) {
+          //     this.openPreview(next);
+          //   }
+          // },
+          // selectItemPrev() {
+          //   if (!this.preview) return;
+          //   const prevIndex = this.preview.index - 1;
+          //   const prev = this.allItems[prevIndex];
+          //   if (prev) {
+          //     this.openPreview(prev);
+          //   }
+          // },
+        };
+      };
+    </script>
+  </body>
+</html>
