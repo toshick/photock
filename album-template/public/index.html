@@ -6,17 +6,34 @@
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <title>せかいのアルバム | {album-title}</title>
     <script src="//unpkg.com/alpinejs" defer></script>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="css/album.css" />
   </head>
   <body>
     <main x-data="app()" x-cloak>
+      <header>Toshick of The World</header>
+      <template x-if="items.length > 0">
+        <section
+          class="hero"
+          :style="
+               {
+                'background-image': `url(${mainImg})`
+              }
+            "
+        >
+          <div>
+            <h1 class="py-3 px-6 text-3xl">{album-title}</h1>
+            <h2 class="py-3 text-lg">{album-id}</h2>
+          </div>
+        </section>
+      </template>
       <template x-if="loadedJson">
         <div class="view">
           <!-- left menu -->
           <section class="container">
-            <h1 class="py-3 text-3xl">{album-title}</h1>
-            <h2 class="py-3 text-lg">{album-id}</h2>
             <p class="py-3" x-html="albumDescription"></p>
           </section>
           <!-- list -->
@@ -26,17 +43,22 @@
                 x-for="(line, index) in itemLines"
                 :key="`line-${index}`"
               >
-                <div class="item-line">
+                <div class="line">
                   <template
                     x-for="(itm, index2) in line"
                     :key="`item-${index2}`"
                   >
-                    <div class="line-item" :class="itm.size">
-                      <!-- <p x-text="itm.size"></p> -->
-                      <div class="line-item-img">
+                    <div class="line-item" :class="itm.size" :data-id="itm.id">
+                      <!-- <p x-text="itm.title"></p> -->
+                      <div
+                        class="line-item-img"
+                        :class="{'-loaded': itm.loaded}"
+                      >
                         <img
                           x-bind="{src: itm.img, alt: `image ${itm.id}`}"
                           loading="lazy"
+                          x-show="itm.loaded"
+                          x-transition.duration.400ms.delay.500ms
                         />
                       </div>
                       <p
@@ -76,7 +98,13 @@
                 const img = item.img.replace(/.+img\//, 'img/');
                 const size = Math.ceil(Math.random() * 3);
                 const loading = index < 5 ? 'eager' : 'lazy';
-                return { ...item, img, size: `-size-${size}`, loading };
+                return {
+                  ...item,
+                  img,
+                  size: `-size-${size}`,
+                  loading,
+                  loaded: false,
+                };
               });
               const data = { ...json, items };
               console.log('data', data);
@@ -93,9 +121,9 @@
           items: [],
           itemLines: [],
           winWidth: window.innerWidth,
+          mainImg: '',
           init() {
             const hasLoading = 'loading' in HTMLImageElement.prototype;
-            console.log('Loading機能', hasLoading);
 
             /**
              * keydown
@@ -135,9 +163,17 @@
             loadData().then((data) => {
               this.loadedJson = data;
               this.items = data.items;
+              if (this.items.length === 0) return;
+
+              const titleItem = this.items.find((i) => {
+                return i.title === 'タイトル';
+              });
+              this.mainImg = titleItem ? titleItem.img : this.items[0].img;
 
               // first view
-              // this.$nextTick(() => {});
+              this.$nextTick(() => {
+                this.observe();
+              });
             });
           },
           /**
@@ -168,9 +204,6 @@
             if (this.isMobile) return 1;
             if (this.isTablet) return 2;
             return 3;
-          },
-          getImgSrc(src) {
-            // return '';
           },
           getLinesFor(linesCount) {
             if (linesCount === 1) {
@@ -203,6 +236,40 @@
           //     this.openPreview(prev);
           //   }
           // },
+          loadImg(item) {
+            return new Promise((resolve) => {
+              const img = new Image();
+              img.onload = () => {
+                item.loaded = true;
+                resolve(item);
+              };
+              img.src = item.img;
+            });
+          },
+          observe() {
+            const observer = new IntersectionObserver(
+              (entries) => {
+                entries.forEach((entry) => {
+                  if (entry.isIntersecting && !entry.target.dataset.loadStart) {
+                    const itemId = entry.target.dataset.id;
+                    entry.target.dataset.loadStart = true;
+                    const itm = this.items.find((i) => i.id === itemId);
+                    this.loadImg(itm);
+                  }
+                });
+              },
+              {
+                root: null,
+                rootMargin: '10px',
+                threshold: 0,
+              },
+            );
+            // 監視
+            const itemRefs = document.querySelectorAll('.line-item');
+            itemRefs.forEach((ref) => {
+              observer.observe(ref);
+            });
+          },
         };
       };
     </script>

@@ -221,6 +221,11 @@ exports.exportAlbum = async function (albumId) {
       path.join(__dirname, `../dist/${albumId}/index.html`),
       html,
     );
+    // data.json
+    fs.copySync(
+      path.join(filePath, `data.json`),
+      path.join(distPath, `data.json`),
+    );
 
     // css
     fs.copySync(

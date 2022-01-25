@@ -12,6 +12,34 @@ html {
   padding: 20px;
 }
 
+header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: #fff;
+  padding: 10px 20px;
+  box-shadow: 0 0 4px 4px rgba(0, 0, 0, 0.2);
+  font-size: 18px;
+}
+@media screen and (max-width: 768px) {
+  header {
+    padding: 5px 10px;
+    font-size: 12px;
+  }
+}
+
+.hero {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-size: cover;
+  background-position: center;
+  height: 300px;
+  text-align: center;
+  color: white;
+  text-shadow: 0 0 2px black;
+}
+
 /* ----------------- */
 /* lines */
 /* ----------------- */
@@ -27,6 +55,12 @@ html {
 
 .line-item-img {
   overflow: hidden;
+  height: 300px;
+  border: dotted 1px #ccc;
+}
+.line-item-img.-loaded {
+  height: auto;
+  border: none;
 }
 
 .line-item-img img {
@@ -34,14 +68,21 @@ html {
   object-fit: cover;
   object-position: center;
 }
+@media screen and (max-width: 768px) {
+  .line-item-img img {
+    border-radius: 3px;
+  }
+}
 
 .line-item.-size-1 .line-item-img img {
-  max-height: 220px;
+  height: 220px;
+  min-height: auto;
   width: 100%;
 }
 
 .line-item.-size-2 .line-item-img img {
-  max-height: 240px;
+  height: 240px;
+  min-height: auto;
   width: 100%;
 }
 
