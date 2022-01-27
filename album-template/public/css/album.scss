@@ -63,9 +63,7 @@ header {
   display: block;
   object-fit: cover;
   object-position: center;
-  @include mobile {
-    border-radius: 3px;
-  }
+  border-radius: 3px;
 }
 
 .line-item.-size-1 {

@@ -13,6 +13,14 @@
           <span><i class="mr-2 fas fa-arrow-up"></i>並び替えを保存</span>
         </o-button>
       </template>
+      <o-button
+        class="mr-3"
+        size="small"
+        variant="primary"
+        @click="uploadingAlbum = true"
+        ><i class="mr-2 fas fa-arrow-alt-circle-up"></i
+        >FireStorageにアップロード</o-button
+      >
       <o-upload @input="onUploadFiles" multiple>
         <o-button tag="a" variant="primary" size="small" class="mr-3">
           <span
@@ -262,6 +270,18 @@
         <a class="text-gray-500 px-4" @click="deleting = false">キャンセル</a>
       </div>
     </Overlay>
+    <!-- アップロード確認 -->
+    <Overlay :active="uploadingAlbum">
+      <div class="text-lg text-center">
+        <a class="text-red-500 px-4" @click="startUploadingFireStorage"
+          ><i class="fas fa-exclamation-triangle px-2"></i
+          >FireStoreにまとめてアップロードします</a
+        >
+        <a class="text-gray-500 px-4" @click="uploadingAlbum = false"
+          >キャンセル</a
+        >
+      </div>
+    </Overlay>
 
     <!-- 移動 -->
     <div class="bottomUI -moveItem" :class="moveItemClass">
@@ -335,6 +355,7 @@ const savedDescription = ref(false);
 const savedConclusion = ref(false);
 const resetting = ref(false);
 const deletingAlbum = ref(false);
+const uploadingAlbum = ref(false);
 const deleting = ref(false);
 const form = reactive({
   albumId,
@@ -553,6 +574,15 @@ const del = async () => {
   }
   toast.ok(`アルバム ${albumId} を削除したケロ`);
   router.push('/');
+};
+
+/**
+ * startUploadingFireStorage
+ *
+ */
+const startUploadingFireStorage = async () => {
+  console.log('startUploadingFireStorage');
+  uploadingAlbum.value = false;
 };
 
 /**
