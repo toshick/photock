@@ -7,7 +7,8 @@
     "typecheck": "nuxi typecheck",
     "template": "npm run template:dev & npm run template:scss",
     "template:dev": "cd album-template/public && reload -b",
-    "template:scss": "sass --watch album-template/public/css"
+    "template:scss": "sass --watch album-template/public/css",
+    "emulators": "firebase emulators:start --import=debug --export-on-exit"
   },
   "devDependencies": {
     "eslint": "^8.5.0",

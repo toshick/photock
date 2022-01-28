@@ -108,3 +108,9 @@ dist
 public/albums/*
 public/photos
 tmp
+
+# firebase
+.firebaserc
+firebase.json
+storage.rules
+debug
