@@ -1,0 +1,33 @@
+{
+  "private": true,
+  "scripts": {
+    "dev": "nuxi dev",
+    "build": "nuxi build",
+    "start": "node .output/server/index.mjs",
+    "typecheck": "nuxi typecheck",
+    "template": "npm run template:dev & npm run template:scss",
+    "template:dev": "cd album-template/public && reload -b",
+    "template:scss": "sass --watch album-template/public/css",
+    "emulators": "firebase emulators:start --import=debug --export-on-exit",
+    "hoge": "echo 'hoge from app'"
+  },
+  "devDependencies": {
+    "eslint": "^8.5.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-nuxt": "^3.1.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-vue": "^8.2.0",
+    "nuxt-windicss": "^2.1.1",
+    "nuxt3": "latest",
+    "prettier": "^2.5.1",
+    "sass": "^1.45.1"
+  },
+  "dependencies": {
+    "@oruga-ui/oruga-next": "^0.4.8",
+    "@oruga-ui/theme-bulma": "^0.1.5",
+    "i18next": "^21.6.4",
+    "vee-validate": "^4.5.7",
+    "vuedraggable": "^4.1.0",
+    "yup": "^0.32.11"
+  }
+}
