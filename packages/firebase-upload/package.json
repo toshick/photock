@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "devDependencies": {},
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "node script/upload.js",
+    "emulators": "firebase emulators:start --import=debug --export-on-exit"
   },
   "repository": {
     "type": "git",
@@ -16,5 +16,12 @@
   "bugs": {
     "url": "https://github.com/toshick/photock/issues"
   },
-  "homepage": "https://github.com/toshick/photock#readme"
+  "homepage": "https://github.com/toshick/photock#readme",
+  "dependencies": {
+    "dotenv": "^15.0.0",
+    "firebase": "^9.6.5",
+    "firebase-admin": "^10.0.2",
+    "fs-extra": "^10.0.0",
+    "uuid": "^8.3.2"
+  }
 }
