@@ -18,6 +18,7 @@
         size="small"
         variant="primary"
         @click="uploadingAlbum = true"
+        :disabled="!hasFirebaseSetting"
         ><i class="mr-2 fas fa-arrow-alt-circle-up"></i
         >FireStorageにアップロード</o-button
       >
@@ -40,50 +41,7 @@
       >
     </GlobalHeader>
     <div class="flex pt-70px">
-      <main class="flex-1 flex-grow-auto flex-shrink-0 pl-8">
-        <!-- NO ITEMS -->
-        <p
-          v-if="itemList.length === 0"
-          class="pt-4 text-3xl font-bold text-gray-400"
-        >
-          NO ITEMS
-        </p>
-        <!-- イメージ一覧 -->
-        <section v-else class="py-2">
-          <div class="mb-4">
-            <a @click="checkAllToggle" class="link-action">
-              <i class="fas fa-check"></i>
-              Check All
-            </a>
-          </div>
-
-          <draggable
-            tag="ul"
-            class="imglist"
-            :list="dragList"
-            handle=".handle"
-            item-key="id"
-            @sort="onSortItem"
-          >
-            <template #item="{ element, index }">
-              <li class="imglist-item">
-                <AlbumItem
-                  :ref="setAlbumRef"
-                  :id="element.id"
-                  :index="index"
-                  :item="element"
-                  :saved="element.saved"
-                  @save="saveItem"
-                  @move-top="() => moveTop(index)"
-                  @move-bottom="() => moveBottom(index)"
-                  @checked="(checked) => (element.checked = checked)"
-                />
-              </li>
-            </template>
-          </draggable>
-        </section>
-      </main>
-      <aside class="w-400px pr-8 relative">
+      <aside class="w-400px px-8 relative">
         <div class="sticky top-70px">
           <div class="">
             <Stack :space="5">
@@ -224,6 +182,49 @@
           </div>
         </div>
       </aside>
+      <main class="flex-1 flex-grow-auto flex-shrink-0">
+        <!-- NO ITEMS -->
+        <p
+          v-if="itemList.length === 0"
+          class="pt-4 text-3xl font-bold text-gray-400"
+        >
+          NO ITEMS
+        </p>
+        <!-- イメージ一覧 -->
+        <section v-else class="py-2">
+          <div class="mb-4">
+            <a @click="checkAllToggle" class="link-action">
+              <i class="fas fa-check"></i>
+              Check All
+            </a>
+          </div>
+
+          <draggable
+            tag="ul"
+            class="imglist"
+            :list="dragList"
+            handle=".handle"
+            item-key="id"
+            @sort="onSortItem"
+          >
+            <template #item="{ element, index }">
+              <li class="imglist-item">
+                <AlbumItem
+                  :ref="setAlbumRef"
+                  :id="element.id"
+                  :index="index"
+                  :item="element"
+                  :saved="element.saved"
+                  @save="saveItem"
+                  @move-top="() => moveTop(index)"
+                  @move-bottom="() => moveBottom(index)"
+                  @checked="(checked) => (element.checked = checked)"
+                />
+              </li>
+            </template>
+          </draggable>
+        </section>
+      </main>
     </div>
 
     <!-- リセット確認 -->
@@ -344,9 +345,12 @@ const loadingOverlay = createLoadingOverlay();
 const r = useRoute();
 const albumId = r.params.id as string;
 const { albumData, refresh } = await useAlbumDetail(albumId);
+const setting = await fetchSetting();
 
-console.log('albumData', JSON.stringify(Object.keys(albumData.value)));
+// console.log('albumData', JSON.stringify(Object.keys(albumData.value)));
+console.log('setting', setting);
 
+const hasFirebaseSetting = ref(setting.firebase || false);
 const itemList = ref([]);
 let itemListBk = [];
 const dragList = ref([]);
@@ -582,6 +586,8 @@ const del = async () => {
  */
 const startUploadingFireStorage = async () => {
   console.log('startUploadingFireStorage');
+  const res = await saveAlbumImageToFireStorage(albumId, {});
+  console.log('res', res);
   uploadingAlbum.value = false;
 };
 

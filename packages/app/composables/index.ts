@@ -54,12 +54,46 @@ export const useAlbumList = () => {
 };
 
 /**
+ * fetchSetting
+ */
+export const fetchSetting = async () => {
+  const config = useRuntimeConfig();
+  const { data, pending, refresh, error } = await useGet(
+    `${config.backendURL}/setting`,
+  );
+  if (error.value) {
+    return { error: error.value.message };
+  }
+  return { ...data?.value };
+};
+
+/**
  * saveAlbumDetail
  */
 export const saveAlbumDetail = async (albumId: string, albumData: object) => {
   const config = useRuntimeConfig();
   const { data, pending, refresh, error } = await usePost(
     `${config.backendURL}/albums/${albumId}/detail`,
+    {
+      ...albumData,
+    },
+  );
+  if (error.value) {
+    return { error: error.value.message };
+  }
+  return { ...data?.value };
+};
+
+/**
+ * saveAlbumImageToFireStorage
+ */
+export const saveAlbumImageToFireStorage = async (
+  albumId: string,
+  albumData: object,
+) => {
+  const config = useRuntimeConfig();
+  const { data, pending, refresh, error } = await usePost(
+    `${config.backendURL}/albums/${albumId}/firestorage`,
     {
       ...albumData,
     },

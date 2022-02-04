@@ -187,6 +187,7 @@ exports.deleteAlbum = async function (albumId) {
  * exportAlbum
  */
 exports.exportAlbum = async function (albumId) {
+  const templatePath = path.join(__dirname, '../app/album-template');
   const data = await exports.loadAlbum(albumId);
 
   const filePath = path.join(pathPublic, `/albums/${albumId}`);
@@ -210,7 +211,7 @@ exports.exportAlbum = async function (albumId) {
   try {
     // index.html
     let html = fs.readFileSync(
-      path.join(__dirname, `../album-template/public/index.html`),
+      path.join(templatePath, `/public/index.html`),
       'utf-8'
     );
     html = html.replace(/\{album-title\}/g, data.albumTitle);
@@ -227,13 +228,13 @@ exports.exportAlbum = async function (albumId) {
 
     // css
     fs.copySync(
-      path.join(__dirname, `../album-template/public/css`),
+      path.join(templatePath, `/public/css`),
       path.join(__dirname, `../dist/${albumId}/css`),
       { overwrite: true }
     );
     // parts
     fs.copySync(
-      path.join(__dirname, `../album-template/public/parts`),
+      path.join(templatePath, `/public/parts`),
       path.join(__dirname, `../dist/${albumId}/parts`),
       { overwrite: true }
     );
