@@ -1,0 +1,29 @@
+{
+  "name": "firebase-upload",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node script/upload.js",
+    "emulators": "firebase emulators:start --import=debug --export-on-exit",
+    "open": "http-server ../dist/2022-0103-hoge"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/toshick/photock.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/toshick/photock/issues"
+  },
+  "homepage": "https://github.com/toshick/photock#readme",
+  "dependencies": {
+    "dotenv": "^15.0.0",
+    "firebase": "^9.6.5",
+    "firebase-admin": "^10.0.2",
+    "fs-extra": "^10.0.0",
+    "http-server": "^14.1.0",
+    "uuid": "^8.3.2"
+  }
+}

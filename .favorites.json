@@ -1,0 +1,26 @@
+[
+    {
+        "type": "Directory",
+        "name": "/Users/toshick/go/src/github.com/toshick/photock/packages/firebase-upload",
+        "parent_id": null,
+        "workspaceRoot": "/Users/toshick/go/src/github.com/toshick/photock",
+        "workspacePath": "packages/firebase-upload",
+        "id": "yIHKogBtlF1isP6f"
+    },
+    {
+        "type": "Directory",
+        "name": "/Users/toshick/go/src/github.com/toshick/photock/packages/app",
+        "parent_id": null,
+        "workspaceRoot": "/Users/toshick/go/src/github.com/toshick/photock",
+        "workspacePath": "packages/app",
+        "id": "9ubMmfEghSY3dLUI"
+    },
+    {
+        "type": "Directory",
+        "name": "/Users/toshick/go/src/github.com/toshick/photock/packages/backend",
+        "parent_id": null,
+        "workspaceRoot": "/Users/toshick/go/src/github.com/toshick/photock",
+        "workspacePath": "packages/backend",
+        "id": "CBp9sEDJ2n51mGuP"
+    }
+]
