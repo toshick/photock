@@ -1,5 +1,5 @@
 {
-  "name": "turborepo-basic-shared",
+  "name": "photock",
   "version": "0.0.0",
   "private": true,
   "workspaces": [
@@ -10,7 +10,10 @@
     "dev": "turbo run app#dev --parallel",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "npmci": "make npmci"
+    "npmci": "make npmci",
+    "i": "pnpm i && npm run i:app",
+    "i:app": "cd packages/app && npm ci",
+    "link": "cd packages/backend && pnpm link ../firebase-upload"
   },
   "devDependencies": {
     "prettier": "^2.5.1",
