@@ -4,10 +4,7 @@ const path = require('path');
 const express = require('express');
 const fileUpload = require('express-fileupload');
 const bodyParser = require('body-parser');
-const { upload: firebaseUpload } = require(path.join(
-  __dirname,
-  '../firebase-upload'
-));
+// const { firebaseUpload } = require('firebase-upload');
 
 const {
   listAlbums,
@@ -155,8 +152,8 @@ app.post('/albums/:albumId/id', async (req, res) => {
  * firestorage
  */
 app.post('/albums/:albumId/firestorage', async (req, res) => {
-  const result = await firebaseUpload();
-  console.log('firestorage', result);
+  // const result = await firebaseUpload();
+  // console.log('firestorage', result);
 
   res.json({
     ok: true,

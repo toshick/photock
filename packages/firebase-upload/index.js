@@ -1,12 +1,12 @@
 const path = require('path');
 const { upload } = require(path.join(__dirname, 'script/helper'));
 
-const imgpath = path.join(__dirname, 'tmp/dog2.png');
+const imgpath = path.join(__dirname, 'tmp/album_dog2.png');
 const filename = path.basename(imgpath);
 // バケット上でのパス
 const distpath = `album/${filename}`;
 
-exports.upload = () => {
+exports.firebaseUpload = () => {
   console.log('あっぷろーどじゃ');
   return upload(imgpath, distpath).then((res) => {
     if (res.error) {

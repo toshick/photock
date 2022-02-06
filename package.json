@@ -8,9 +8,9 @@
     "packages/firebase-upload"
   ],
   "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run app#dev --parallel",
-    "lint": "turbo run lint",
+    "build": "pnpm turbo run build",
+    "dev": "pnpm turbo run dev",
+    "lint": "pnpm turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "npmci": "make npmci",
     "i": "pnpm i && npm run i:app",
