@@ -24,5 +24,6 @@
   "engines": {
     "npm": ">=8",
     "node": ">=16.0.0"
-  }
+  },
+  "packageManager": "pnpm@6.29.1"
 }
