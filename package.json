@@ -9,13 +9,13 @@
   ],
   "scripts": {
     "build": "pnpm turbo run build",
-    "dev": "pnpm turbo run dev",
+    "dev": "pnpm turbo run app#dev",
     "lint": "pnpm turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "npmci": "make npmci",
-    "i": "pnpm i && npm run i:app",
-    "i:app": "cd packages/app && npm ci",
-    "link": "cd packages/backend && pnpm link ../firebase-upload"
+    "i": "pnpm i",
+    "link": "cd packages/backend && pnpm link ../firebase-upload",
+    "clean": "rm -rf node_modules && cd packages/app && rm -rf node_modules",
+    "init": "pnpm init -w packages/app -y && pnpm init -w packages/backend -y && pnpm init -w packages/firebase-upload -y"
   },
   "devDependencies": {
     "prettier": "^2.5.1",
