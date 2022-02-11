@@ -14,6 +14,7 @@ importers:
     specifiers:
       '@oruga-ui/oruga-next': ^0.4.8
       '@oruga-ui/theme-bulma': ^0.1.5
+      bulma: ^0.9.3
       eslint: ^8.5.0
       eslint-config-prettier: ^8.3.0
       eslint-plugin-nuxt: ^3.1.0
@@ -35,6 +36,7 @@ importers:
       vuedraggable: 4.1.0
       yup: 0.32.11
     devDependencies:
+      bulma: 0.9.3
       eslint: 8.8.0
       eslint-config-prettier: 8.3.0_eslint@8.8.0
       eslint-plugin-nuxt: 3.1.0_eslint@8.8.0
@@ -2437,7 +2439,6 @@ packages:
 
   /bulma/0.9.3:
     resolution: {integrity: sha512-0d7GNW1PY4ud8TWxdNcP6Cc8Bu7MxcntD/RRLGWuiw/s0a9P+XlH/6QoOIrmbj6o8WWJzJYhytiu9nFjTszk1g==}
-    dev: false
 
   /bundle-runner/0.0.1:
     resolution: {integrity: sha512-xevhXw77nJ7wjCRTyo1JYumUNUiZmD0CJEummyLUJbdhub4bZWuplS+Y7nlMq5V9sKJQW+dV/LZR/SlxS5f4LQ==}
