@@ -55,11 +55,11 @@
               ><i class="far fa-trash-alt"></i
             ></a> -->
             <!-- 移動ボタン -->
-            <a class="btn-remove iconbutton" @click="$emit('move-top')"
+            <a class="btn-remove iconbutton" @click="$emit('move-up')"
               ><i class="fas fa-chevron-up"></i
             ></a>
             <!-- 移動ボタン -->
-            <a class="btn-remove iconbutton" @click="$emit('move-bottom')"
+            <a class="btn-remove iconbutton" @click="$emit('move-down')"
               ><i class="fas fa-chevron-down"></i
             ></a>
           </nav>
@@ -111,13 +111,7 @@ import type { AlbumItem } from '@/types/apptype';
 import * as yup from 'yup';
 import { zeropad } from '@/util/helper';
 
-const emit = defineEmits([
-  'checked',
-  'save',
-  'remove',
-  'move-top',
-  'move-bottom',
-]);
+const emit = defineEmits(['checked', 'save', 'remove', 'move-up', 'move-down']);
 const props = defineProps({
   index: {
     type: Number,

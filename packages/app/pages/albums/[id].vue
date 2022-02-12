@@ -216,8 +216,8 @@
                   :item="element"
                   :saved="element.saved"
                   @save="saveItem"
-                  @move-top="() => moveTop(index)"
-                  @move-bottom="() => moveBottom(index)"
+                  @move-up="() => moveUp(index)"
+                  @move-down="() => moveDown(index)"
                   @checked="(checked) => (element.checked = checked)"
                 />
               </li>
@@ -690,21 +690,23 @@ const saveSelectedState = async () => {
   return { removed: true };
 };
 
-const moveTop = async (index: number) => {
+const moveUp = async (index: number) => {
   if (index === 0) return;
   const ary = [...itemList.value];
   const item = ary[index];
   ary.splice(index, 1);
-  ary.unshift(item);
+  ary.splice(index - 1, 0, item);
+  // ary.unshift(item);
   itemList.value = getAlbumItemsWithIndex(ary);
 };
 
-const moveBottom = async (index: number) => {
+const moveDown = async (index: number) => {
   const ary = [...itemList.value];
   if (index === ary.length - 1) return;
   const item = ary[index];
   ary.splice(index, 1);
-  ary.push(item);
+  ary.splice(index + 1, 0, item);
+  // ary.push(item);
   itemList.value = getAlbumItemsWithIndex(ary);
 };
 
