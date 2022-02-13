@@ -191,7 +191,7 @@ exports.exportAlbum = async function (albumId) {
   const data = await exports.loadAlbum(albumId);
 
   const filePath = path.join(pathPublic, `/albums/${albumId}`);
-  const distPath = path.join(__dirname, `../dist/${albumId}`);
+  const distPath = path.join(__dirname, `../../dist/${albumId}`);
   fs.ensureDirSync(distPath);
   fs.ensureDirSync(path.join(distPath, 'img'));
   // try {
@@ -216,10 +216,7 @@ exports.exportAlbum = async function (albumId) {
     );
     html = html.replace(/\{album-title\}/g, data.albumTitle);
     html = html.replace(/\{album-id\}/g, albumId);
-    fs.writeFileSync(
-      path.join(__dirname, `../dist/${albumId}/index.html`),
-      html
-    );
+    fs.writeFileSync(path.join(distPath, `index.html`), html);
     // data.json
     fs.copySync(
       path.join(filePath, `data.json`),
@@ -229,13 +226,13 @@ exports.exportAlbum = async function (albumId) {
     // css
     fs.copySync(
       path.join(templatePath, `/public/css`),
-      path.join(__dirname, `../dist/${albumId}/css`),
+      path.join(distPath, `/css`),
       { overwrite: true }
     );
     // parts
     fs.copySync(
       path.join(templatePath, `/public/parts`),
-      path.join(__dirname, `../dist/${albumId}/parts`),
+      path.join(distPath, `parts`),
       { overwrite: true }
     );
   } catch (error) {

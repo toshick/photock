@@ -12,6 +12,7 @@ export type AlbumItem = {
   index?: string;
   id: string;
   img: string;
+  firebaseUrl?: string;
   title: string;
   description: string;
 };

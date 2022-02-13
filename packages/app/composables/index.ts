@@ -1,4 +1,4 @@
-import type { AppState } from '@/types/apptype';
+import type { AppState, AlbumItemEdit } from '@/types/apptype';
 import { zeropad } from '@/util/helper';
 
 const usePost = (url: string, body: any = {}) => {
@@ -89,13 +89,13 @@ export const saveAlbumDetail = async (albumId: string, albumData: object) => {
  */
 export const saveAlbumImageToFireStorage = async (
   albumId: string,
-  albumData: object,
+  itemList: AlbumItemEdit[],
 ) => {
   const config = useRuntimeConfig();
   const { data, pending, refresh, error } = await usePost(
     `${config.backendURL}/albums/${albumId}/firestorage`,
     {
-      ...albumData,
+      itemList,
     },
   );
   if (error.value) {

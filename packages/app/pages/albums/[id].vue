@@ -276,7 +276,7 @@
       <div class="text-lg text-center">
         <a class="text-red-500 px-4" @click="startUploadingFireStorage"
           ><i class="fas fa-exclamation-triangle px-2"></i
-          >FireStoreにまとめてアップロードします</a
+          >エクスポートしてからFireStoreにまとめてアップロードします</a
         >
         <a class="text-gray-500 px-4" @click="uploadingAlbum = false"
           >キャンセル</a
@@ -543,19 +543,24 @@ const saveAlbumId = async () => {
 /**
  * saveItem
  */
-const saveItem = async (item: AlbumItemEdit) => {
+const saveItem = async (item: AlbumItemEdit | AlbumItemEdit[]) => {
   await backupAlbum(albumId);
-  const items = itemList.value.map((i) => {
-    if (i.id === item.id) return item;
-    return i;
-  });
+  let items: AlbumItemEdit[] = [];
+  if (Array.isArray(item)) {
+    items = item;
+  } else {
+    items = itemList.value.map((i) => {
+      if (i.id === item.id) return item;
+      return i;
+    });
+  }
   const res = await saveAlbumDetail(albumId, {
     ...albumData.value,
     items: items.map((i) => getAlbumItemForSend(i)),
   });
   if (res.error) {
     toast.ng(`❗️アイテム情報保存エラー ${res.error}`);
-    return;
+    return false;
   }
   await refresh();
 
@@ -564,6 +569,7 @@ const saveItem = async (item: AlbumItemEdit) => {
     return myref.$props.id === item.id;
   });
   if (targetRef) targetRef.showSaved();
+  return true;
 };
 
 /**
@@ -585,10 +591,33 @@ const del = async () => {
  *
  */
 const startUploadingFireStorage = async () => {
-  console.log('startUploadingFireStorage');
-  const res = await saveAlbumImageToFireStorage(albumId, {});
-  console.log('res', res);
+  loadingOverlay.open();
+  const res1 = await exportAlbum(albumId);
+  if (res1.error) {
+    toast.ng('エクスポートに失敗');
+    return;
+  }
+  const { result } = await saveAlbumImageToFireStorage(albumId, itemList.value);
+  console.log('result', { ...result });
+
+  const items = itemList.value.map((i: AlbumItemEdit) => {
+    const t = result[i.index];
+    if (t) {
+      i.firebaseUrl = t.url;
+      console.log('t', t);
+    }
+    return i;
+  });
+
+  console.log('items', JSON.parse(JSON.stringify(items)));
+  const res3 = await saveItem(items);
+  if (!res3) {
+    return;
+  }
+  toast.ok('firebaseアップロード完了');
+
   uploadingAlbum.value = false;
+  loadingOverlay.close();
 };
 
 /**
@@ -631,6 +660,7 @@ const getAlbumItemForSend = (i: AlbumItemEdit): Item => {
     img: i.img,
     title: i.title,
     description: i.description,
+    firebaseUrl: i.firebaseUrl,
   };
 };
 

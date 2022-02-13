@@ -9,7 +9,7 @@
   ],
   "scripts": {
     "init": "pnpm i && npm run init:workspace",
-    "init:workspace": "pnpm init -w packages/app -y && pnpm init -w packages/backend -y && pnpm init -w packages/firebase-upload -y",
+    "init:workspace": "pnpm init -w packages/app -y && pnpm init -w packages/backend -y",
     "build": "pnpm turbo run build",
     "dev": "pnpm turbo run app#dev",
     "lint": "pnpm turbo run lint",

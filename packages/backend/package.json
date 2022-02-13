@@ -30,5 +30,6 @@
     "url": "https://github.com/toshick/photock/issues"
   },
   "homepage": "https://github.com/toshick/photock#readme",
+  "devDependencies": {},
   "description": ""
 }

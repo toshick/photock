@@ -153,16 +153,32 @@ app.post('/albums/:albumId/id', async (req, res) => {
  * firestorage
  */
 app.post('/albums/:albumId/firestorage', async (req, res) => {
-  const { imgpath } = req.params;
-  const filename = path.basename(imgpath);
-  // バケット上でのパス
-  const distpath = `album/${filename}`;
+  const { itemList } = req.body;
+  console.log('firestorage itemList', itemList);
 
-  const result = await firebaseUpload(imgpath, distpath);
-  console.log('firestorage', result);
+  const resultDic = {};
+  await Promise.all(
+    itemList.map((item) => {
+      const imgpath = path.join(
+        __dirname,
+        '../../dist',
+        item.img.replace('/albums', '')
+      );
+      const filename = path.basename(imgpath);
+      // バケット上でのパス
+      const distpath = `album/${filename}`;
+      return firebaseUpload(imgpath, distpath)
+        .then((r) => {
+          resultDic[item.index] = r;
+        })
+        .catch(() => {
+          resultDic[item.index] = {};
+        });
+    })
+  );
 
   res.json({
-    ok: true,
+    result: resultDic,
   });
 });
 
