@@ -15,7 +15,7 @@
     "lint": "pnpm turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
     "link": "cd packages/backend && pnpm link ../firebase-upload",
-    "clean": "rm -rf node_modules && cd packages/app && rm -rf node_modules",
+    "clean": "rm -rf node_modules && cd packages/app && rm -rf node_modules && cd ../backend && rm -rf node_modules",
     "p:app": "pnpm run dev --filter app",
     "p:backend": "pnpm run nodemon --filter backend"
   },

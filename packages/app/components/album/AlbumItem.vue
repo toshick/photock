@@ -133,6 +133,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  uploaded: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 const state = reactive({
@@ -246,6 +250,14 @@ defineExpose({ resetChecked, forceChecked, showSaved });
   }
   .btn-revert {
     display: block;
+  }
+  .uploaded {
+    display: block;
+    position: absolute;
+    bottom: -30px;
+    right: 14px;
+    color: var(--primary-color);
+    pointer-events: none;
   }
   &-ui {
     & > a {

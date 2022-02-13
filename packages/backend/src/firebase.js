@@ -4,7 +4,7 @@ const { initializeApp, cert } = require('firebase-admin/app');
 const { getStorage } = require('firebase-admin/storage');
 const serviceAccount = require(path.join(
   __dirname,
-  `../../${process.env.SERVICEACCOUNT_JSON}`
+  `../${process.env.SERVICEACCOUNT_JSON}`
 ));
 
 const { connectStorageEmulator } = require('firebase/storage');
@@ -31,9 +31,9 @@ if (process.env.IS_DEV) {
 }
 
 /**
- * upload
+ * firebaseUpload
  */
-function upload(imgpath, distpath) {
+function firebaseUpload(imgpath, distpath) {
   const bucket = storage.bucket();
   return new Promise((resolve) => {
     bucket.upload(
@@ -57,4 +57,4 @@ function upload(imgpath, distpath) {
   });
 }
 
-exports.upload = upload;
+exports.firebaseUpload = firebaseUpload;

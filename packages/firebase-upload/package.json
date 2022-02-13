@@ -4,8 +4,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "node script/upload.js",
-    "emulators": "firebase emulators:start --import=debug --export-on-exit",
-    "open": "http-server ../dist/2022-0103-hoge"
+    "emulators": "firebase emulators:start --import=debug --export-on-exit"
   },
   "repository": {
     "type": "git",
