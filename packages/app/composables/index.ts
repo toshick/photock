@@ -30,6 +30,16 @@ const useGetLazy = (url: string, params: any = null) => {
   });
 };
 
+function getErrorFromRes(data: any, error: any) {
+  if (error.value) {
+    return { error: error.value?.message };
+  }
+  if (data?.value?.error) {
+    return { error: data?.value.error };
+  }
+  return null;
+}
+
 /**
  * useAppState
  */
@@ -47,8 +57,10 @@ export const useAppState = () => {
 export const useAlbumList = () => {
   const { data, pending, refresh, error } = useGetLazy('/api/albums');
   const albums = computed(() => data?.value?.albums || []);
-  if (error.value) {
-    return { error: error.value.message };
+
+  const err = getErrorFromRes(data, error);
+  if (err) {
+    return { error: err.error };
   }
   return { albums, refresh };
 };
@@ -61,8 +73,10 @@ export const fetchSetting = async () => {
   const { data, pending, refresh, error } = await useGet(
     `${config.backendURL}/setting`,
   );
-  if (error.value) {
-    return { error: error.value.message };
+
+  const err = getErrorFromRes(data, error);
+  if (err) {
+    return { error: err.error };
   }
   return { ...data?.value };
 };
@@ -78,8 +92,10 @@ export const saveAlbumDetail = async (albumId: string, albumData: object) => {
       ...albumData,
     },
   );
-  if (error.value) {
-    return { error: error.value.message };
+
+  const err = getErrorFromRes(data, error);
+  if (err) {
+    return { error: err.error };
   }
   return { ...data?.value };
 };
@@ -98,8 +114,10 @@ export const saveAlbumImageToFireStorage = async (
       itemList,
     },
   );
-  if (error.value) {
-    return { error: error.value.message };
+
+  const err = getErrorFromRes(data, error);
+  if (err) {
+    return { error: err.error };
   }
   return { ...data?.value };
 };
@@ -112,8 +130,10 @@ export const exportAlbum = async (albumId: string) => {
   const { data, pending, refresh, error } = await usePost(
     `${config.backendURL}/albums/${albumId}/export`,
   );
-  if (error.value) {
-    return { error: error.value.message };
+
+  const err = getErrorFromRes(data, error);
+  if (err) {
+    return { error: err.error };
   }
   return { ...data?.value };
 };
@@ -126,8 +146,10 @@ export const deleteAlbum = async (albumId: string) => {
   const { data, pending, refresh, error } = await useDelete(
     `${config.backendURL}/albums/${albumId}/detail`,
   );
-  if (error.value) {
-    return { error: error.value.message };
+
+  const err = getErrorFromRes(data, error);
+  if (err) {
+    return { error: err.error };
   }
   return { ...data?.value };
 };
@@ -138,7 +160,11 @@ export const deleteAlbum = async (albumId: string) => {
 export const backupAlbum = async (albumId: string) => {
   const config = useRuntimeConfig();
   const url = `${config.backendURL}/albums/${albumId}/backup`;
-  const { data } = await usePost(url);
+  const { data, error } = await usePost(url);
+  const err = getErrorFromRes(data, error);
+  if (err) {
+    return { error: err.error };
+  }
   return { ...data?.value };
 };
 
@@ -173,8 +199,10 @@ export const changeAlbumId = async (albumId: string, newId: string) => {
   const config = useRuntimeConfig();
   const url = `${config.backendURL}/albums/${albumId}/id`;
   const { data, error } = await usePost(url, { newId });
-  if (error.value) {
-    return { error: error.value.message };
+
+  const err = getErrorFromRes(data, error);
+  if (err) {
+    return { error: err.error };
   }
   return { ...data.value };
 };
@@ -186,8 +214,10 @@ export const removeAlbumImage = async (albumId: string, imgId: string) => {
   const config = useRuntimeConfig();
   const url = `${config.backendURL}/albums/${albumId}/image/${imgId}`;
   const { data, error } = await useDelete(url);
-  if (error.value) {
-    return { error: error.value.message };
+
+  const err = getErrorFromRes(data, error);
+  if (err) {
+    return { error: err.error };
   }
   return { ...data.value };
 };
@@ -199,8 +229,10 @@ export const resetAlbumImage = async (albumId: string) => {
   const config = useRuntimeConfig();
   const url = `${config.backendURL}/albums/${albumId}/reset/`;
   const { data, error } = await useDelete(url);
-  if (error.value) {
-    return { error: error.value.message };
+
+  const err = getErrorFromRes(data, error);
+  if (err) {
+    return { error: err.error };
   }
   return { ...data.value };
 };
@@ -220,8 +252,10 @@ export const useAlbumDetail = async (albumId: string) => {
     }
     return ret;
   });
-  if (error.value) {
-    return { error: error.value.message };
+
+  const err = getErrorFromRes(data, error);
+  if (err) {
+    return { error: err.error };
   }
   return { albumData, refresh };
 };
@@ -237,8 +271,10 @@ export const testGet = async (albumId: string, d: object) => {
       ...d,
     },
   );
-  if (error.value) {
-    return { error: error.value.message };
+
+  const err = getErrorFromRes(data, error);
+  if (err) {
+    return { error: err.error };
   }
   return { ...data?.value };
 };

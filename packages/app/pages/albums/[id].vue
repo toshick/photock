@@ -673,11 +673,12 @@ const getAlbumItemsWithIndex = (ary: AlbumItemEdit[]) => {
 const startExportAlbum = async () => {
   loadingOverlay.open();
   const res = await exportAlbum(albumId);
+  loadingOverlay.close();
   if (res.error) {
-    toast.ng('エクスポートに失敗');
+    toast.ng(`エクスポートに失敗 ${res.error}`);
     return;
   }
-  loadingOverlay.close();
+
   toast.ok('エクスポートを完了');
 };
 

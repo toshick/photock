@@ -17,7 +17,7 @@ const {
   exportAlbum,
 } = require('./app');
 const { firebaseUpload } = require('./firebase');
-const { backupAlbumJson, pathPublic } = require('./util');
+const { backupAlbumJson, pathPublic, distPath } = require('./util');
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(
@@ -124,7 +124,11 @@ app.post('/albums/:albumId/backup', async (req, res) => {
  */
 app.post('/albums/:albumId/export', async (req, res) => {
   const { albumId } = req.params;
-  await exportAlbum(albumId);
+  const result = await exportAlbum(albumId);
+  if (result.error) {
+    res.json({ error: result.error });
+    return;
+  }
 
   res.json({ export: true });
 });
@@ -159,11 +163,7 @@ app.post('/albums/:albumId/firestorage', async (req, res) => {
   const resultDic = {};
   await Promise.all(
     itemList.map((item) => {
-      const imgpath = path.join(
-        __dirname,
-        '../../dist',
-        item.img.replace('/albums', '')
-      );
+      const imgpath = path.join(distPath, item.img.replace('/albums', ''));
       const filename = path.basename(imgpath);
       // バケット上でのパス
       const distpath = `album/${filename}`;

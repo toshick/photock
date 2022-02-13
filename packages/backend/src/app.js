@@ -3,6 +3,7 @@ const fs = require('fs-extra');
 const uuid = require('uuid');
 const path = require('path');
 const {
+  distPath,
   pathPublic,
   getFiles,
   loadAlbumJson,
@@ -187,13 +188,13 @@ exports.deleteAlbum = async function (albumId) {
  * exportAlbum
  */
 exports.exportAlbum = async function (albumId) {
-  const templatePath = path.join(__dirname, '../app/album-template');
+  const templatePath = path.join(__dirname, '../../app/album-template');
   const data = await exports.loadAlbum(albumId);
 
   const filePath = path.join(pathPublic, `/albums/${albumId}`);
-  const distPath = path.join(__dirname, `../../dist/${albumId}`);
-  fs.ensureDirSync(distPath);
-  fs.ensureDirSync(path.join(distPath, 'img'));
+  const myDistPath = path.join(distPath, albumId);
+  fs.ensureDirSync(myDistPath);
+  fs.ensureDirSync(path.join(myDistPath, 'img'));
   // try {
   //   fs.copySync(filePath, distPath, { overwrite: true });
   // } catch (error) {
@@ -203,7 +204,7 @@ exports.exportAlbum = async function (albumId) {
   // sips
   const sipsResult = execSync(
     `sips -Z 1280 ${path.join(filePath, 'img/*')} -o ${path.join(
-      distPath,
+      myDistPath,
       'img'
     )}`
   );
@@ -216,23 +217,23 @@ exports.exportAlbum = async function (albumId) {
     );
     html = html.replace(/\{album-title\}/g, data.albumTitle);
     html = html.replace(/\{album-id\}/g, albumId);
-    fs.writeFileSync(path.join(distPath, `index.html`), html);
+    fs.writeFileSync(path.join(myDistPath, `index.html`), html);
     // data.json
     fs.copySync(
       path.join(filePath, `data.json`),
-      path.join(distPath, `data.json`)
+      path.join(myDistPath, `data.json`)
     );
 
     // css
     fs.copySync(
       path.join(templatePath, `/public/css`),
-      path.join(distPath, `/css`),
+      path.join(myDistPath, `css`),
       { overwrite: true }
     );
     // parts
     fs.copySync(
       path.join(templatePath, `/public/parts`),
-      path.join(distPath, `parts`),
+      path.join(myDistPath, `parts`),
       { overwrite: true }
     );
   } catch (error) {
@@ -241,7 +242,7 @@ exports.exportAlbum = async function (albumId) {
 
   // imageoptim
   // const imageoptimResult = execSync(
-  //   `imageoptim ${path.join(distPath, 'img/*')}`,
+  //   `imageoptim ${path.join(myDistPath, 'img/*')}`,
   // );
   // console.log(`sipsResult: ${imageoptimResult.toString()}`);
 
