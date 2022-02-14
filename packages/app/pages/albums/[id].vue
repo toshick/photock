@@ -594,24 +594,29 @@ const startUploadingFireStorage = async () => {
   loadingOverlay.open();
   const res1 = await exportAlbum(albumId);
   if (res1.error) {
-    toast.ng('エクスポートに失敗');
+    toast.ng(`エクスポートに失敗 ${res1.error}`);
     return;
   }
-  const { result } = await saveAlbumImageToFireStorage(albumId, itemList.value);
+  const list = getAlbumItemsWithIndex(dragList.value);
+  const { result } = await saveAlbumImageToFireStorage(albumId, list);
   console.log('result', { ...result });
 
-  const items = itemList.value.map((i: AlbumItemEdit) => {
+  const items = list.map((i: AlbumItemEdit) => {
     const t = result[i.index];
     if (t) {
       i.firebaseUrl = t.url;
-      console.log('t', t);
+      console.log('t', i.index, t.url);
     }
     return i;
   });
-
-  console.log('items', JSON.parse(JSON.stringify(items)));
   const res3 = await saveItem(items);
   if (!res3) {
+    return;
+  }
+  // firebaseUrlつきでエクスポートする
+  const res4 = await exportAlbum(albumId);
+  if (res4.error) {
+    toast.ng(`エクスポートに失敗 ${res4.error}`);
     return;
   }
   toast.ok('firebaseアップロード完了');

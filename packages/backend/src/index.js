@@ -158,7 +158,7 @@ app.post('/albums/:albumId/id', async (req, res) => {
  */
 app.post('/albums/:albumId/firestorage', async (req, res) => {
   const { itemList } = req.body;
-  console.log('firestorage itemList', itemList);
+  // console.log('firestorage itemList', itemList);
 
   const resultDic = {};
   await Promise.all(
