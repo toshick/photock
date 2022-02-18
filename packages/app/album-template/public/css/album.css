@@ -110,6 +110,9 @@ header {
 .line-item-txt {
   margin: 6px 0;
 }
+.line-item-txt a {
+  color: #caa944;
+}
 
 footer {
   background-color: #f0d687;

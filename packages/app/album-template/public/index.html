@@ -226,7 +226,12 @@
             return lines;
           },
           getText(str = '') {
-            return str.replace(/[\r\n]/g, '<br>');
+            return str
+              .replace(/[\r\n]/g, '<br>')
+              .replace(
+                /(http[a-zA-Z0-9/\-.:_]+)/g,
+                '<a href="$1" target="_blank">$1</a>',
+              );
           },
           // selectItemNext() {
           //   if (!this.preview) return;
