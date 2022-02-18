@@ -283,6 +283,18 @@
         >
       </div>
     </Overlay>
+    <!-- Firebaseアップロード状況 -->
+    <Overlay :active="uploadingFireBase.doing">
+      <div class="text-lg text-center">
+        <p class="text-red-500 px-4">
+          <i class="fas fa-exclamation-triangle px-2"></i
+          >Firebaseへアップロード中
+        </p>
+        <p class="pt-4">
+          {{ uploadingFireBase.count }}/{{ uploadingFireBase.total }}
+        </p>
+      </div>
+    </Overlay>
 
     <!-- 移動 -->
     <div class="bottomUI -moveItem" :class="moveItemClass">
@@ -360,6 +372,11 @@ const savedConclusion = ref(false);
 const resetting = ref(false);
 const deletingAlbum = ref(false);
 const uploadingAlbum = ref(false);
+const uploadingFireBase = reactive({
+  doing: false,
+  count: 0,
+  total: 0,
+});
 const deleting = ref(false);
 const form = reactive({
   albumId,
@@ -591,25 +608,45 @@ const del = async () => {
  *
  */
 const startUploadingFireStorage = async () => {
-  loadingOverlay.open();
+  uploadingFireBase.doing = true;
+  const list = getAlbumItemsWithIndex(dragList.value);
+  const errors = [];
+  uploadingFireBase.count = 0;
+  uploadingFireBase.total = list.length;
+
   const res1 = await exportAlbum(albumId);
   if (res1.error) {
     toast.ng(`エクスポートに失敗 ${res1.error}`);
     return;
   }
-  const list = getAlbumItemsWithIndex(dragList.value);
-  const { result } = await saveAlbumImageToFireStorage(albumId, list);
-  console.log('result', { ...result });
 
-  const items = list.map((i: AlbumItemEdit) => {
-    const t = result[i.index];
-    if (t) {
-      i.firebaseUrl = t.url;
-      console.log('t', i.index, t.url);
-    }
-    return i;
-  });
-  const res3 = await saveItem(items);
+  await list.reduce((ps: Promise<any>, item: AlbumItemEdit) => {
+    return ps.then(async () => {
+      const res = await saveAlbumImageToFireStorage(albumId, [item]);
+      const { result } = res;
+      if (!result) {
+        console.log('resultなし', item.index);
+        errors.push(item.index);
+        return;
+      }
+      const t = result[item.index];
+      if (t.error) {
+        console.log('firebaseアップロードエラー', t.error);
+        errors.push(item.index);
+      } else {
+        item.firebaseUrl = t.url;
+        uploadingFireBase.count += 1;
+      }
+      console.log('つぎへ');
+    });
+  }, Promise.resolve());
+
+  if (errors.length > 0) {
+    toast.ng(`firebaseアップロードにてエラー発生 ${errors}`);
+    return;
+  }
+
+  const res3 = await saveItem(list);
   if (!res3) {
     return;
   }
@@ -622,7 +659,7 @@ const startUploadingFireStorage = async () => {
   toast.ok('firebaseアップロード完了');
 
   uploadingAlbum.value = false;
-  loadingOverlay.close();
+  uploadingFireBase.doing = false;
 };
 
 /**
@@ -670,7 +707,7 @@ const getAlbumItemForSend = (i: AlbumItemEdit): Item => {
 };
 
 const getAlbumItemsWithIndex = (ary: AlbumItemEdit[]) => {
-  return ary.map((i: AlbumItemEdit, index: number) => {
+  return ary.concat().map((i: AlbumItemEdit, index: number) => {
     return { ...i, index: zeropad(index, 5) };
   });
 };

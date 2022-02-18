@@ -57,12 +57,25 @@ header {
 /* ----------------- */
 .lines {
   margin: 0 auto;
-  padding: 0 3px;
+  padding: 0 9px;
+}
+@media screen and (max-width: 768px) {
+  .lines {
+    padding: 0 3px;
+  }
 }
 
 .line-item {
-  padding: 3px 3px 10px;
+  padding: 3px 9px 10px;
   font-size: 14px;
+}
+@media screen and (max-width: 768px) {
+  .line-item {
+    padding: 3px 18px 10px;
+  }
+  .line-item .line-item-img img {
+    height: auto !important;
+  }
 }
 
 .line-item-img {

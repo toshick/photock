@@ -49,8 +49,14 @@ function firebaseUpload(imgpath, distpath) {
       (err, file, apiResponse) => {
         if (err) {
           resolve({ error: err.message });
+          return;
         }
-        // console.log('apiResponse', apiResponse);
+        if (!file) {
+          console.log('エラー', apiResponse);
+          resolve({ error: 'file is null' });
+          return;
+        }
+        console.log('uploaded', file.name);
         resolve({ uploaded: file.name, url: apiResponse.mediaLink });
       }
     );
