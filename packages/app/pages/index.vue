@@ -1,7 +1,7 @@
 <template>
   <main class>
     <GlobalHeader>
-      <o-dropdown position="bottom-right" ref="pulldown">
+      <o-dropdown class="ml-3" position="bottom-left" ref="pulldown">
         <template #trigger>
           <o-button size="small" variant="primary">新規アルバム</o-button>
         </template>
@@ -64,7 +64,6 @@ const { albums, refresh } = useAlbumList();
 // func
 //----------------------
 const onClickAlbum = (album: Album) => {
-  // router.push(`/albums/${album.name}/`);
   location.href = `/albums/${album.name}/`;
 };
 
@@ -75,7 +74,7 @@ const createAlbum = async (e: HTMLButtonElement, val: string) => {
     name: val,
     path: '',
     thumbnail: '',
-    description: 'せつめいだぞ',
+    albumDescription: '',
   };
   const res = await saveAlbumDetail(album.name, {
     ...album,

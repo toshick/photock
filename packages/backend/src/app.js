@@ -117,8 +117,18 @@ exports.listAlbums = async function () {
     return { error: 'can not read album list' };
   }
   return {
-    albums: dirs.map((path) => {
-      return { name: path.split('/').pop(), path };
+    albums: dirs.map((mypath) => {
+      let thumbnail = '';
+      const json = fs.readJsonSync(`${mypath}/data.json`);
+      if (json && json.items.length > 0) {
+        const target = json.items.find((i) => i.title === 'タイトル');
+        thumbnail = target ? target.img : '';
+        if (!thumbnail) {
+          thumbnail = json.items[0].img;
+        }
+      }
+
+      return { name: mypath.split('/').pop(), path: mypath, thumbnail };
     }),
   };
 };

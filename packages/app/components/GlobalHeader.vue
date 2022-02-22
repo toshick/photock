@@ -1,13 +1,13 @@
 <template>
   <header class="vcenter">
-    <div class="container vcenter py-2">
+    <div class="vcenter px-8 py-2">
       <h1 class="font-bold text-white text-2xl">
         <NuxtLink to="/">PHOTOCK</NuxtLink>
       </h1>
-      <div class="ml-6">
+      <div class="ml-220px" v-if="$slots.left">
         <slot name="left" />
       </div>
-      <div class="ml-auto">
+      <div class="ml-auto" v-if="$slots.default">
         <slot />
       </div>
     </div>

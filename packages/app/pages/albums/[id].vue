@@ -13,15 +13,7 @@
           <span><i class="mr-2 fas fa-arrow-up"></i>並び替えを保存</span>
         </o-button>
       </template>
-      <o-button
-        class="mr-3"
-        size="small"
-        variant="primary"
-        @click="uploadingAlbum = true"
-        :disabled="!hasFirebaseSetting"
-        ><i class="mr-2 fas fa-arrow-alt-circle-up"></i
-        >FireStorageにアップロード</o-button
-      >
+
       <o-upload @input="onUploadFiles" multiple>
         <o-button tag="a" variant="primary" size="small" class="mr-3">
           <span
@@ -38,6 +30,15 @@
         variant="primary"
         @click="startExportAlbum"
         ><i class="mr-2 fas fa-arrow-circle-down"></i>エクスポート</o-button
+      >
+      <o-button
+        class="ml-3"
+        size="small"
+        variant="primary"
+        @click="uploadingAlbum = true"
+        :disabled="!hasFirebaseSetting"
+        ><i class="mr-2 fas fa-arrow-alt-circle-up"></i
+        >FireStorageにアップロード</o-button
       >
     </GlobalHeader>
     <div class="flex pt-70px">
@@ -887,7 +888,7 @@ const saveIndexBtnClass = computed(() => {
   display: block;
   position: absolute;
   top: -32px;
-  left: 140px;
+  left: 170px;
   // box-shadow: 0 0 2px 1px white;
   border: solid 1px #fff;
   transition: all 0.3s ease;
