@@ -38,6 +38,12 @@ exports.saveAlbum = async function (albumId, body) {
   if (!albumId) {
     return { error: 'albumId is not provided' };
   }
+  if (body.items) {
+    const find = body.items.find((d) => d.title === 'タイトル');
+    if (find && find.firebaseUrl) {
+      body.thumbnail = find.firebaseUrl;
+    }
+  }
 
   // 保存
   const saved = await saveAlbumJson(albumId, body);
@@ -120,7 +126,7 @@ exports.listAlbums = async function () {
     albums: dirs.map((mypath) => {
       let thumbnail = '';
       const json = fs.readJsonSync(`${mypath}/data.json`);
-      if (json && json.items.length > 0) {
+      if (json && json.items?.length > 0) {
         const target = json.items.find((i) => i.title === 'タイトル');
         thumbnail = target ? target.img : '';
         if (!thumbnail) {
@@ -227,6 +233,21 @@ exports.exportAlbum = async function (albumId) {
     );
     html = html.replace(/\{album-title\}/g, data.albumTitle);
     html = html.replace(/\{album-id\}/g, albumId);
+    // og tag
+    html = html.replace(/\{og-title\}/g, data.albumTitle);
+    html = html.replace(/\{og-type\}/g, 'article');
+    html = html.replace(
+      /\{og-url\}/g,
+      `https://toshick-com.vercel.app/memory/${albumId}/index.html`
+    );
+    html = html.replace(/\{og-image\}/g, data.thumbnail);
+    html = html.replace(
+      /\{og-description\}/g,
+      data.albumDescription.replace(/[\r\n]/g, '')
+    );
+    html = html.replace(/\{og-site_name\}/g, data.albumTitle);
+    html = html.replace(/\{og-twitter\}/g, 'summary');
+
     fs.writeFileSync(path.join(myDistPath, `index.html`), html);
     // data.json
     fs.copySync(

@@ -63,6 +63,8 @@
               ><i class="fas fa-chevron-down"></i
             ></a>
           </nav>
+          <!-- firebased -->
+          <i v-if="firebased" class="fas fa-arrow-up firebased"></i>
         </figure>
         <!-- 削除確認 -->
         <div class="imgitem-img-confirm-remove" v-if="state.removing">
@@ -158,6 +160,7 @@ const editted = computed(() => {
   const propDescription = props.item.description || '';
   return formTitle !== propTitle || formDescription !== propDescription;
 });
+const firebased = computed(() => item.value.firebaseUrl?.length > 0);
 const myClass = computed(() => {
   return { '-editted': editted.value, [props.class]: true };
 });
@@ -250,6 +253,13 @@ defineExpose({ resetChecked, forceChecked, showSaved });
   }
   .btn-revert {
     display: block;
+  }
+  .firebased {
+    position: absolute;
+    bottom: -3px;
+    right: 10px;
+    color: #eee;
+    pointer-events: none;
   }
   .uploaded {
     display: block;

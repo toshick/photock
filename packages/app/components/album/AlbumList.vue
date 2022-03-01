@@ -6,7 +6,7 @@
       class="album mr-4 mb-4"
     >
       <a class="album-link" @click="() => $emit('clickAlbum', { ...a })">
-        <img :src="a.thumbnail" />
+        <img :src="a.thumbnail" :alt="a.name" />
         <p class="album-id">{{ a.name.slice(0, 9) }}</p>
       </a>
       <p class="py-1">{{ a.name }}</p>

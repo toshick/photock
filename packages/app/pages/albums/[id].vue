@@ -31,15 +31,6 @@
         @click="startExportAlbum"
         ><i class="mr-2 fas fa-arrow-circle-down"></i>エクスポート</o-button
       >
-      <o-button
-        class="ml-3"
-        size="small"
-        variant="primary"
-        @click="uploadingAlbum = true"
-        :disabled="!hasFirebaseSetting"
-        ><i class="mr-2 fas fa-arrow-alt-circle-up"></i
-        >FireStorageにアップロード</o-button
-      >
     </GlobalHeader>
     <div class="flex pt-70px">
       <aside class="w-400px px-8 relative">
@@ -332,6 +323,15 @@
       >
         <span class="">の直後にまとめて移動</span>
       </o-button>
+      <p class="mx-3">または</p>
+      <o-button
+        size="small"
+        variant="primary"
+        @click="uploadingAlbum = true"
+        :disabled="!hasFirebaseSetting"
+        ><i class="mr-2 fas fa-arrow-alt-circle-up"></i
+        >FireStorageにアップロード</o-button
+      >
     </div>
   </article>
 </template>
@@ -359,9 +359,6 @@ const r = useRoute();
 const albumId = r.params.id as string;
 const { albumData, refresh } = await useAlbumDetail(albumId);
 const setting = await fetchSetting();
-
-// console.log('albumData', JSON.stringify(Object.keys(albumData.value)));
-console.log('setting', setting);
 
 const hasFirebaseSetting = ref(setting.firebase || false);
 const itemList = ref([]);
@@ -563,15 +560,13 @@ const saveAlbumId = async () => {
  */
 const saveItem = async (item: AlbumItemEdit | AlbumItemEdit[]) => {
   await backupAlbum(albumId);
-  let items: AlbumItemEdit[] = [];
-  if (Array.isArray(item)) {
-    items = item;
-  } else {
-    items = itemList.value.map((i) => {
-      if (i.id === item.id) return item;
-      return i;
-    });
-  }
+  const targetItems = Array.isArray(item) ? item : [item];
+  const items = itemList.value.map((i) => {
+    const find = targetItems.find((t) => t.id === i.id);
+    if (find) return find;
+    return i;
+  });
+
   const res = await saveAlbumDetail(albumId, {
     ...albumData.value,
     items: items.map((i) => getAlbumItemForSend(i)),
@@ -610,7 +605,7 @@ const del = async () => {
  */
 const startUploadingFireStorage = async () => {
   uploadingFireBase.doing = true;
-  const list = getAlbumItemsWithIndex(dragList.value);
+  const list = [...selectedItems.value];
   const errors = [];
   uploadingFireBase.count = 0;
   uploadingFireBase.total = list.length;
@@ -651,13 +646,9 @@ const startUploadingFireStorage = async () => {
   if (!res3) {
     return;
   }
-  // firebaseUrlつきでエクスポートする
-  const res4 = await exportAlbum(albumId);
-  if (res4.error) {
-    toast.ng(`エクスポートに失敗 ${res4.error}`);
-    return;
-  }
   toast.ok('firebaseアップロード完了');
+  // 選択解除
+  clearChecked();
 
   uploadingAlbum.value = false;
   uploadingFireBase.doing = false;
