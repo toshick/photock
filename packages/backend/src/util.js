@@ -4,8 +4,10 @@ const glob = require('glob');
 const JSON_FILE_NAME = 'data.json';
 const JSON_FILE_NAME_BK = 'data-bk.json';
 const initialData = { items: [], description: '' };
-const pathPublic = path.join(__dirname, '../app/public');
+const pathPublic = path.join(__dirname, '../../app/public');
+const distPath = path.join(__dirname, `../../../dist/`);
 
+exports.distPath = distPath;
 exports.pathPublic = pathPublic;
 
 /**

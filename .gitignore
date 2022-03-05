@@ -33,3 +33,9 @@ yarn-error.log*
 .turbo
 
 tmp
+.env
+
+# firebase
+serviceAccountKey
+
+copy-album.js

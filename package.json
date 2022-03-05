@@ -3,25 +3,33 @@
   "version": "0.0.0",
   "private": true,
   "workspaces": [
-    "packages/*"
+    "packages/app",
+    "packages/backend",
+    "packages/firebase-upload"
   ],
   "scripts": {
-    "build": "turbo run build",
-    "dev": "turbo run app#dev --parallel",
-    "lint": "turbo run lint",
+    "init": "pnpm i && npm run init:workspace",
+    "init:workspace": "pnpm init -w packages/app -y && pnpm init -w packages/backend -y",
+    "build": "pnpm turbo run build",
+    "dev": "pnpm turbo run app#dev",
+    "lint": "pnpm turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-    "npmci": "make npmci",
-    "i": "pnpm i && npm run i:app",
-    "i:app": "cd packages/app && npm ci",
-    "link": "cd packages/backend && pnpm link ../firebase-upload"
+    "link": "cd packages/backend && pnpm link ../firebase-upload",
+    "clean": "rm -rf node_modules && cd packages/app && rm -rf node_modules && cd ../backend && rm -rf node_modules",
+    "p:app": "pnpm run dev --filter app",
+    "p:backend": "pnpm run nodemon --filter backend"
   },
   "devDependencies": {
     "prettier": "^2.5.1",
     "turbo": "latest"
   },
   "engines": {
-    "npm": ">=7.0.0",
-    "node": ">=14.0.0"
+    "npm": ">=8",
+    "node": ">=16.0.0"
   },
-  "packageManager": "npm@6.14.11"
+  "packageManager": "pnpm@6.29.1",
+  "dependencies": {
+    "fs-extra": "^10.0.0",
+    "glob": "^7.2.0"
+  }
 }

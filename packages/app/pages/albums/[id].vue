@@ -13,15 +13,7 @@
           <span><i class="mr-2 fas fa-arrow-up"></i>並び替えを保存</span>
         </o-button>
       </template>
-      <o-button
-        class="mr-3"
-        size="small"
-        variant="primary"
-        @click="uploadingAlbum = true"
-        :disabled="!hasFirebaseSetting"
-        ><i class="mr-2 fas fa-arrow-alt-circle-up"></i
-        >FireStorageにアップロード</o-button
-      >
+
       <o-upload @input="onUploadFiles" multiple>
         <o-button tag="a" variant="primary" size="small" class="mr-3">
           <span
@@ -216,8 +208,8 @@
                   :item="element"
                   :saved="element.saved"
                   @save="saveItem"
-                  @move-top="() => moveTop(index)"
-                  @move-bottom="() => moveBottom(index)"
+                  @move-up="() => moveUp(index)"
+                  @move-down="() => moveDown(index)"
                   @checked="(checked) => (element.checked = checked)"
                 />
               </li>
@@ -276,11 +268,23 @@
       <div class="text-lg text-center">
         <a class="text-red-500 px-4" @click="startUploadingFireStorage"
           ><i class="fas fa-exclamation-triangle px-2"></i
-          >FireStoreにまとめてアップロードします</a
+          >エクスポートしてからFireStoreにまとめてアップロードします</a
         >
         <a class="text-gray-500 px-4" @click="uploadingAlbum = false"
           >キャンセル</a
         >
+      </div>
+    </Overlay>
+    <!-- Firebaseアップロード状況 -->
+    <Overlay :active="uploadingFireBase.doing">
+      <div class="text-lg text-center">
+        <p class="text-red-500 px-4">
+          <i class="fas fa-exclamation-triangle px-2"></i
+          >Firebaseへアップロード中
+        </p>
+        <p class="pt-4">
+          {{ uploadingFireBase.count }}/{{ uploadingFireBase.total }}
+        </p>
       </div>
     </Overlay>
 
@@ -319,6 +323,15 @@
       >
         <span class="">の直後にまとめて移動</span>
       </o-button>
+      <p class="mx-3">または</p>
+      <o-button
+        size="small"
+        variant="primary"
+        @click="uploadingAlbum = true"
+        :disabled="!hasFirebaseSetting"
+        ><i class="mr-2 fas fa-arrow-alt-circle-up"></i
+        >FireStorageにアップロード</o-button
+      >
     </div>
   </article>
 </template>
@@ -347,9 +360,6 @@ const albumId = r.params.id as string;
 const { albumData, refresh } = await useAlbumDetail(albumId);
 const setting = await fetchSetting();
 
-// console.log('albumData', JSON.stringify(Object.keys(albumData.value)));
-console.log('setting', setting);
-
 const hasFirebaseSetting = ref(setting.firebase || false);
 const itemList = ref([]);
 let itemListBk = [];
@@ -360,6 +370,11 @@ const savedConclusion = ref(false);
 const resetting = ref(false);
 const deletingAlbum = ref(false);
 const uploadingAlbum = ref(false);
+const uploadingFireBase = reactive({
+  doing: false,
+  count: 0,
+  total: 0,
+});
 const deleting = ref(false);
 const form = reactive({
   albumId,
@@ -543,19 +558,22 @@ const saveAlbumId = async () => {
 /**
  * saveItem
  */
-const saveItem = async (item: AlbumItemEdit) => {
+const saveItem = async (item: AlbumItemEdit | AlbumItemEdit[]) => {
   await backupAlbum(albumId);
+  const targetItems = Array.isArray(item) ? item : [item];
   const items = itemList.value.map((i) => {
-    if (i.id === item.id) return item;
+    const find = targetItems.find((t) => t.id === i.id);
+    if (find) return find;
     return i;
   });
+
   const res = await saveAlbumDetail(albumId, {
     ...albumData.value,
     items: items.map((i) => getAlbumItemForSend(i)),
   });
   if (res.error) {
     toast.ng(`❗️アイテム情報保存エラー ${res.error}`);
-    return;
+    return false;
   }
   await refresh();
 
@@ -564,6 +582,7 @@ const saveItem = async (item: AlbumItemEdit) => {
     return myref.$props.id === item.id;
   });
   if (targetRef) targetRef.showSaved();
+  return true;
 };
 
 /**
@@ -585,10 +604,54 @@ const del = async () => {
  *
  */
 const startUploadingFireStorage = async () => {
-  console.log('startUploadingFireStorage');
-  const res = await saveAlbumImageToFireStorage(albumId, {});
-  console.log('res', res);
+  uploadingFireBase.doing = true;
+  const list = [...selectedItems.value];
+  const errors = [];
+  uploadingFireBase.count = 0;
+  uploadingFireBase.total = list.length;
+
+  const res1 = await exportAlbum(albumId);
+  if (res1.error) {
+    toast.ng(`エクスポートに失敗 ${res1.error}`);
+    return;
+  }
+
+  await list.reduce((ps: Promise<any>, item: AlbumItemEdit) => {
+    return ps.then(async () => {
+      const res = await saveAlbumImageToFireStorage(albumId, [item]);
+      const { result } = res;
+      if (!result) {
+        console.log('resultなし', item.index);
+        errors.push(item.index);
+        return;
+      }
+      const t = result[item.index];
+      if (t.error) {
+        console.log('firebaseアップロードエラー', t.error);
+        errors.push(item.index);
+      } else {
+        item.firebaseUrl = t.url;
+        uploadingFireBase.count += 1;
+      }
+      console.log('つぎへ');
+    });
+  }, Promise.resolve());
+
+  if (errors.length > 0) {
+    toast.ng(`firebaseアップロードにてエラー発生 ${errors}`);
+    return;
+  }
+
+  const res3 = await saveItem(list);
+  if (!res3) {
+    return;
+  }
+  toast.ok('firebaseアップロード完了');
+  // 選択解除
+  clearChecked();
+
   uploadingAlbum.value = false;
+  uploadingFireBase.doing = false;
 };
 
 /**
@@ -631,11 +694,12 @@ const getAlbumItemForSend = (i: AlbumItemEdit): Item => {
     img: i.img,
     title: i.title,
     description: i.description,
+    firebaseUrl: i.firebaseUrl,
   };
 };
 
 const getAlbumItemsWithIndex = (ary: AlbumItemEdit[]) => {
-  return ary.map((i: AlbumItemEdit, index: number) => {
+  return ary.concat().map((i: AlbumItemEdit, index: number) => {
     return { ...i, index: zeropad(index, 5) };
   });
 };
@@ -643,11 +707,12 @@ const getAlbumItemsWithIndex = (ary: AlbumItemEdit[]) => {
 const startExportAlbum = async () => {
   loadingOverlay.open();
   const res = await exportAlbum(albumId);
+  loadingOverlay.close();
   if (res.error) {
-    toast.ng('エクスポートに失敗');
+    toast.ng(`エクスポートに失敗 ${res.error}`);
     return;
   }
-  loadingOverlay.close();
+
   toast.ok('エクスポートを完了');
 };
 
@@ -690,21 +755,23 @@ const saveSelectedState = async () => {
   return { removed: true };
 };
 
-const moveTop = async (index: number) => {
+const moveUp = async (index: number) => {
   if (index === 0) return;
   const ary = [...itemList.value];
   const item = ary[index];
   ary.splice(index, 1);
-  ary.unshift(item);
+  ary.splice(index - 1, 0, item);
+  // ary.unshift(item);
   itemList.value = getAlbumItemsWithIndex(ary);
 };
 
-const moveBottom = async (index: number) => {
+const moveDown = async (index: number) => {
   const ary = [...itemList.value];
   if (index === ary.length - 1) return;
   const item = ary[index];
   ary.splice(index, 1);
-  ary.push(item);
+  ary.splice(index + 1, 0, item);
+  // ary.push(item);
   itemList.value = getAlbumItemsWithIndex(ary);
 };
 
@@ -812,7 +879,7 @@ const saveIndexBtnClass = computed(() => {
   display: block;
   position: absolute;
   top: -32px;
-  left: 140px;
+  left: 170px;
   // box-shadow: 0 0 2px 1px white;
   border: solid 1px #fff;
   transition: all 0.3s ease;

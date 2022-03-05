@@ -4,6 +4,17 @@
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
+    <meta name="”author”" content="せかいのとしっく" />
+    <meta name="”description”" content="{og-description}" />
+    <!-- og tag -->
+    <meta property="og:title" content="{og-title}" />
+    <meta property="og:type" content="{og-type}" />
+    <meta property="og:url" content="{og-url}" />
+    <meta property="og:image" content="{og-image}" />
+    <meta property="og:description" content="{og-description}" />
+    <meta property="og:site_name" content="{og-site_name}" />
+    <meta name="twitter:card" content="{og-twitter}" />
+
     <title>せかいのアルバム | {album-title}</title>
     <script src="//unpkg.com/alpinejs" defer></script>
     <link
@@ -14,7 +25,14 @@
   </head>
   <body>
     <main x-data="app()" x-cloak>
-      <header>Toshick of The World</header>
+      <header>
+        <p>Toshick of The World</p>
+        <p
+          class="mt-1 overflow-ellipsis whitespace-nowrap max-w-full overflow-hidden"
+        >
+          {album-title}
+        </p>
+      </header>
       <template x-if="items.length > 0">
         <section
           class="hero"
@@ -80,6 +98,9 @@
       <footer>copyright せかいのとしっく</footer>
     </main>
     <script>
+      function getImgUrl(data) {
+        return data.firebaseUrl || data.img || '';
+      }
       /**
        * loadData
        */
@@ -95,7 +116,10 @@
             .then((response) => response.json())
             .then((json) => {
               const items = json.items.map((item, index) => {
-                const img = item.img.replace(/.+img\//, 'img/');
+                let img = getImgUrl(item);
+                if (img.includes('img/')) {
+                  img = img.replace(/.+img\//, 'img/');
+                }
                 const size = Math.ceil(Math.random() * 3);
                 const loading = index < 5 ? 'eager' : 'lazy';
                 return {
@@ -107,7 +131,6 @@
                 };
               });
               const data = { ...json, items };
-              console.log('data', data);
               resolve(data);
             });
         });
@@ -180,16 +203,12 @@
            * getter
            */
           get albumDescription() {
-            return `${this.loadedJson.albumDescription.replace(
-              /[\r\n]/g,
-              '<br>',
-            )}`;
+            const txt = this.loadedJson.albumDescription || '';
+            return `${txt.replace(/[\r\n]/g, '<br>')}`;
           },
           get albumConclusion() {
-            return `${this.loadedJson.albumConclusion.replace(
-              /[\r\n]/g,
-              '<br>',
-            )}`;
+            const txt = this.loadedJson.albumConclusion || '';
+            return `${txt.replace(/[\r\n]/g, '<br>')}`;
           },
           get itemLines() {
             return this.getLinesFor(this.lineNum);
@@ -218,7 +237,12 @@
             return lines;
           },
           getText(str = '') {
-            return str.replace(/[\r\n]/g, '<br>');
+            return str
+              .replace(/[\r\n]/g, '<br>')
+              .replace(
+                /(http[a-zA-Z0-9/\-.:_]+)/g,
+                '<a href="$1" target="_blank">$1</a>',
+              );
           },
           // selectItemNext() {
           //   if (!this.preview) return;
@@ -260,7 +284,7 @@
               },
               {
                 root: null,
-                rootMargin: '10px',
+                rootMargin: '0px 0px 200px 0px',
                 threshold: 0,
               },
             );

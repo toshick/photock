@@ -10,6 +10,10 @@
     },
     "hoge2": {
       "dependsOn": ["backend#hoge"]
-    }
+    },
+    "app#dev": {
+      "dependsOn": ["backend#nodemon"]
+    },
+    "backend#nodemon": {}
   }
 }

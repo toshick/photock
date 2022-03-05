@@ -5,7 +5,14 @@
 }
 
 html {
-  color: #999;
+  color: #666;
+  background-color: #f0d687;
+}
+
+main {
+  background-color: #fff;
+  border-left: solid 1px #f5df99;
+  border-right: solid 1px #f5df99;
 }
 
 .container {
@@ -16,10 +23,15 @@ header {
   position: sticky;
   top: 0;
   z-index: 10;
-  background-color: #fff;
+  overflow: hidden;
+  background-color: #f0d687;
   padding: 10px 20px;
-  box-shadow: 0 0 4px 4px rgba(0, 0, 0, 0.2);
+  border-bottom: solid 1px white;
+  background-image: url("../parts/natural-paper.png");
+  color: #fff;
+  font-weight: bold;
   font-size: 18px;
+  text-shadow: 0 0 3px rgba(0, 0, 0, 0.2);
 }
 @media screen and (max-width: 768px) {
   header {
@@ -45,12 +57,25 @@ header {
 /* ----------------- */
 .lines {
   margin: 0 auto;
-  padding: 0 3px;
+  padding: 0 9px;
+}
+@media screen and (max-width: 768px) {
+  .lines {
+    padding: 0 3px;
+  }
 }
 
 .line-item {
-  padding: 3px;
-  font-size: 12px;
+  padding: 3px 9px 10px;
+  font-size: 14px;
+}
+@media screen and (max-width: 768px) {
+  .line-item {
+    padding: 3px 18px 10px;
+  }
+  .line-item .line-item-img img {
+    height: auto !important;
+  }
 }
 
 .line-item-img {
@@ -67,11 +92,7 @@ header {
   display: block;
   object-fit: cover;
   object-position: center;
-}
-@media screen and (max-width: 768px) {
-  .line-item-img img {
-    border-radius: 3px;
-  }
+  border-radius: 3px;
 }
 
 .line-item.-size-1 .line-item-img img {
@@ -89,11 +110,15 @@ header {
 .line-item-txt {
   margin: 6px 0;
 }
+.line-item-txt a {
+  color: #caa944;
+}
 
 footer {
-  background-color: #333;
+  background-color: #f0d687;
   padding: 60px 0;
   text-align: center;
+  background-image: url("../parts/natural-paper.png");
 }
 
 /*# sourceMappingURL=album.css.map */

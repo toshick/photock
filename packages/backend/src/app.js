@@ -3,6 +3,7 @@ const fs = require('fs-extra');
 const uuid = require('uuid');
 const path = require('path');
 const {
+  distPath,
   pathPublic,
   getFiles,
   loadAlbumJson,
@@ -36,6 +37,12 @@ exports.xxx = async function () {
 exports.saveAlbum = async function (albumId, body) {
   if (!albumId) {
     return { error: 'albumId is not provided' };
+  }
+  if (body.items) {
+    const find = body.items.find((d) => d.title === 'タイトル');
+    if (find && find.firebaseUrl) {
+      body.thumbnail = find.firebaseUrl;
+    }
   }
 
   // 保存
@@ -116,8 +123,18 @@ exports.listAlbums = async function () {
     return { error: 'can not read album list' };
   }
   return {
-    albums: dirs.map((path) => {
-      return { name: path.split('/').pop(), path };
+    albums: dirs.map((mypath) => {
+      let thumbnail = '';
+      const json = fs.readJsonSync(`${mypath}/data.json`);
+      if (json && json.items?.length > 0) {
+        const target = json.items.find((i) => i.title === 'タイトル');
+        thumbnail = target ? target.img : '';
+        if (!thumbnail) {
+          thumbnail = json.items[0].img;
+        }
+      }
+
+      return { name: mypath.split('/').pop(), path: mypath, thumbnail };
     }),
   };
 };
@@ -187,13 +204,13 @@ exports.deleteAlbum = async function (albumId) {
  * exportAlbum
  */
 exports.exportAlbum = async function (albumId) {
-  const templatePath = path.join(__dirname, '../app/album-template');
+  const templatePath = path.join(__dirname, '../../app/album-template');
   const data = await exports.loadAlbum(albumId);
 
   const filePath = path.join(pathPublic, `/albums/${albumId}`);
-  const distPath = path.join(__dirname, `../dist/${albumId}`);
-  fs.ensureDirSync(distPath);
-  fs.ensureDirSync(path.join(distPath, 'img'));
+  const myDistPath = path.join(distPath, albumId);
+  fs.ensureDirSync(myDistPath);
+  fs.ensureDirSync(path.join(myDistPath, 'img'));
   // try {
   //   fs.copySync(filePath, distPath, { overwrite: true });
   // } catch (error) {
@@ -203,7 +220,7 @@ exports.exportAlbum = async function (albumId) {
   // sips
   const sipsResult = execSync(
     `sips -Z 1280 ${path.join(filePath, 'img/*')} -o ${path.join(
-      distPath,
+      myDistPath,
       'img'
     )}`
   );
@@ -216,26 +233,38 @@ exports.exportAlbum = async function (albumId) {
     );
     html = html.replace(/\{album-title\}/g, data.albumTitle);
     html = html.replace(/\{album-id\}/g, albumId);
-    fs.writeFileSync(
-      path.join(__dirname, `../dist/${albumId}/index.html`),
-      html
+    // og tag
+    html = html.replace(/\{og-title\}/g, data.albumTitle);
+    html = html.replace(/\{og-type\}/g, 'article');
+    html = html.replace(
+      /\{og-url\}/g,
+      `https://toshick-com.vercel.app/memory/${albumId}/index.html`
     );
+    html = html.replace(/\{og-image\}/g, data.thumbnail);
+    html = html.replace(
+      /\{og-description\}/g,
+      data.albumDescription.replace(/[\r\n]/g, '')
+    );
+    html = html.replace(/\{og-site_name\}/g, data.albumTitle);
+    html = html.replace(/\{og-twitter\}/g, 'summary');
+
+    fs.writeFileSync(path.join(myDistPath, `index.html`), html);
     // data.json
     fs.copySync(
       path.join(filePath, `data.json`),
-      path.join(distPath, `data.json`)
+      path.join(myDistPath, `data.json`)
     );
 
     // css
     fs.copySync(
       path.join(templatePath, `/public/css`),
-      path.join(__dirname, `../dist/${albumId}/css`),
+      path.join(myDistPath, `css`),
       { overwrite: true }
     );
     // parts
     fs.copySync(
       path.join(templatePath, `/public/parts`),
-      path.join(__dirname, `../dist/${albumId}/parts`),
+      path.join(myDistPath, `parts`),
       { overwrite: true }
     );
   } catch (error) {
@@ -244,7 +273,7 @@ exports.exportAlbum = async function (albumId) {
 
   // imageoptim
   // const imageoptimResult = execSync(
-  //   `imageoptim ${path.join(distPath, 'img/*')}`,
+  //   `imageoptim ${path.join(myDistPath, 'img/*')}`,
   // );
   // console.log(`sipsResult: ${imageoptimResult.toString()}`);
 

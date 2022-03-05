@@ -1,13 +1,10 @@
+require('dotenv').config();
 const fs = require('fs-extra');
 const cors = require('cors');
 const path = require('path');
 const express = require('express');
 const fileUpload = require('express-fileupload');
 const bodyParser = require('body-parser');
-const { upload: firebaseUpload } = require(path.join(
-  __dirname,
-  '../firebase-upload'
-));
 
 const {
   listAlbums,
@@ -19,7 +16,8 @@ const {
   deleteAlbum,
   exportAlbum,
 } = require('./app');
-const { backupAlbumJson, pathPublic } = require('./util');
+const { firebaseUpload } = require('./firebase');
+const { backupAlbumJson, pathPublic, distPath } = require('./util');
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(
@@ -126,7 +124,11 @@ app.post('/albums/:albumId/backup', async (req, res) => {
  */
 app.post('/albums/:albumId/export', async (req, res) => {
   const { albumId } = req.params;
-  await exportAlbum(albumId);
+  const result = await exportAlbum(albumId);
+  if (result.error) {
+    res.json({ error: result.error });
+    return;
+  }
 
   res.json({ export: true });
 });
@@ -155,11 +157,28 @@ app.post('/albums/:albumId/id', async (req, res) => {
  * firestorage
  */
 app.post('/albums/:albumId/firestorage', async (req, res) => {
-  const result = await firebaseUpload();
-  console.log('firestorage', result);
+  const { itemList } = req.body;
+  // console.log('firestorage itemList', itemList);
+
+  const resultDic = {};
+  await Promise.all(
+    itemList.map((item) => {
+      const imgpath = path.join(distPath, item.img.replace('/albums', ''));
+      const filename = path.basename(imgpath);
+      // バケット上でのパス
+      const distpath = `album/${filename}`;
+      return firebaseUpload(imgpath, distpath)
+        .then((r) => {
+          resultDic[item.index] = r;
+        })
+        .catch(() => {
+          resultDic[item.index] = {};
+        });
+    })
+  );
 
   res.json({
-    ok: true,
+    result: resultDic,
   });
 });
 

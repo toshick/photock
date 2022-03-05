@@ -1,4 +1,3 @@
-require('dotenv').config();
 const { v4: uuidv4 } = require('uuid');
 const path = require('path');
 const { initializeApp, cert } = require('firebase-admin/app');
@@ -32,9 +31,9 @@ if (process.env.IS_DEV) {
 }
 
 /**
- * upload
+ * firebaseUpload
  */
-function upload(imgpath, distpath) {
+function firebaseUpload(imgpath, distpath) {
   const bucket = storage.bucket();
   return new Promise((resolve) => {
     bucket.upload(
@@ -50,12 +49,18 @@ function upload(imgpath, distpath) {
       (err, file, apiResponse) => {
         if (err) {
           resolve({ error: err.message });
+          return;
         }
-        console.log('apiResponse', apiResponse);
+        if (!file) {
+          console.log('エラー', apiResponse);
+          resolve({ error: 'file is null' });
+          return;
+        }
+        console.log('uploaded', file.name);
         resolve({ uploaded: file.name, url: apiResponse.mediaLink });
       }
     );
   });
 }
 
-exports.upload = upload;
+exports.firebaseUpload = firebaseUpload;

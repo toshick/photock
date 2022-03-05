@@ -55,14 +55,16 @@
               ><i class="far fa-trash-alt"></i
             ></a> -->
             <!-- 移動ボタン -->
-            <a class="btn-remove iconbutton" @click="$emit('move-top')"
+            <a class="btn-remove iconbutton" @click="$emit('move-up')"
               ><i class="fas fa-chevron-up"></i
             ></a>
             <!-- 移動ボタン -->
-            <a class="btn-remove iconbutton" @click="$emit('move-bottom')"
+            <a class="btn-remove iconbutton" @click="$emit('move-down')"
               ><i class="fas fa-chevron-down"></i
             ></a>
           </nav>
+          <!-- firebased -->
+          <i v-if="firebased" class="fas fa-arrow-up firebased"></i>
         </figure>
         <!-- 削除確認 -->
         <div class="imgitem-img-confirm-remove" v-if="state.removing">
@@ -111,13 +113,7 @@ import type { AlbumItem } from '@/types/apptype';
 import * as yup from 'yup';
 import { zeropad } from '@/util/helper';
 
-const emit = defineEmits([
-  'checked',
-  'save',
-  'remove',
-  'move-top',
-  'move-bottom',
-]);
+const emit = defineEmits(['checked', 'save', 'remove', 'move-up', 'move-down']);
 const props = defineProps({
   index: {
     type: Number,
@@ -136,6 +132,10 @@ const props = defineProps({
     default: () => {},
   },
   saved: {
+    type: Boolean,
+    default: false,
+  },
+  uploaded: {
     type: Boolean,
     default: false,
   },
@@ -160,6 +160,7 @@ const editted = computed(() => {
   const propDescription = props.item.description || '';
   return formTitle !== propTitle || formDescription !== propDescription;
 });
+const firebased = computed(() => item.value.firebaseUrl?.length > 0);
 const myClass = computed(() => {
   return { '-editted': editted.value, [props.class]: true };
 });
@@ -252,6 +253,21 @@ defineExpose({ resetChecked, forceChecked, showSaved });
   }
   .btn-revert {
     display: block;
+  }
+  .firebased {
+    position: absolute;
+    bottom: -3px;
+    right: 10px;
+    color: #eee;
+    pointer-events: none;
+  }
+  .uploaded {
+    display: block;
+    position: absolute;
+    bottom: -30px;
+    right: 14px;
+    color: var(--primary-color);
+    pointer-events: none;
   }
   &-ui {
     & > a {
