@@ -1,6 +1,13 @@
 {
   "baseBranch": "origin/main",
   "pipeline": {
+    "app#dev": {},
+    "app#build-and-start": {},
+    "backend#nodemon": {},
+    "cypress#local": {},
+    "cypress#ci": {
+      "outputs": ["packages/cypress/test-output.xml"]
+    },
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["dist/**", ".next/**"]
@@ -11,9 +18,11 @@
     "hoge2": {
       "dependsOn": ["backend#hoge"]
     },
-    "app#dev": {
+    "backend#dev": {
       "dependsOn": ["backend#nodemon"]
     },
-    "backend#nodemon": {}
+    "mydev": {
+      "dependsOn": ["backend#nodemon", "app#dev"]
+    }
   }
 }

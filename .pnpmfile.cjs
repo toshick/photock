@@ -43,6 +43,10 @@ module.exports = {
         pkg.dependencies['vue'] = '^3.2.29';
         pkg.dependencies['vue-router'] = '^4.0.12';
         pkg.dependencies['vue-bundle-renderer'] = '^0.3.5';
+        pkg.dependencies['vite'] = '^2.3.0';
+      } else if (pkg.name === 'backend') {
+        pkg.dependencies['@firebase/app-compat'] = '^0.1.2';
+        pkg.dependencies['@firebase/app-types'] = '0.7.0';
       }
       return pkg;
     },

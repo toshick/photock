@@ -19,4 +19,5 @@ export default defineNuxtConfig({
   privateRuntimeConfig: {
     backendURL,
   },
+  ssr: false,
 });

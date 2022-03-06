@@ -7,6 +7,8 @@
 // commands please read more here:
 // https://on.cypress.io/custom-commands
 // ***********************************************
+import 'cypress-wait-until';
+
 //
 //
 // -- This is a parent command --
@@ -23,3 +25,33 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
+
+Cypress.Commands.add(
+  'containsChain',
+  { prevSubject: 'element' },
+  (subject, value) => {
+    cy.get(subject).contains(value);
+    cy.get(subject).then(() => {
+      return subject;
+    });
+  }
+);
+
+Cypress.Commands.add('waitPageIdle', () => {
+  cy.waitUntil(() =>
+    cy.window().then((win) => {
+      // return Boolean(win.$nuxt.config.globalProperties.$oruga);
+      return new Promise((resolve) => {
+        win.requestIdleCallback(() => {
+          setTimeout(() => {
+            resolve();
+          }, 300);
+        });
+      });
+    })
+  );
+});
+
+Cypress.Commands.overwrite('log', (subject, message) =>
+  cy.task('log', message)
+);

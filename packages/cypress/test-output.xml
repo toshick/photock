@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites name="Mocha Tests" time="9.2320" tests="3" failures="0">
+  <testsuite name="Root Suite" timestamp="2022-03-06T13:25:23" tests="0" file="cypress/integration/app/index.spec.js" time="0.0000" failures="0">
+  </testsuite>
+  <testsuite name="top" timestamp="2022-03-06T13:25:23" tests="3" time="9.2320" failures="0">
+    <testcase name="top should render album list" time="3.9890" classname="should render album list">
+    </testcase>
+    <testcase name="top should create an album" time="2.5230" classname="should create an album">
+    </testcase>
+    <testcase name="top should delete an album" time="2.7200" classname="should delete an album">
+    </testcase>
+  </testsuite>
+</testsuites>

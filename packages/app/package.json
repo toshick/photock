@@ -3,7 +3,8 @@
   "scripts": {
     "dev": "nuxi dev",
     "build": "nuxi build",
-    "start": "node .output/server/index.mjs",
+    "start": "nuxi preview",
+    "build-and-start": "npm run build && npm run start",
     "typecheck": "nuxi typecheck",
     "template": "npm run template:dev & npm run template:scss",
     "template:dev": "cd album-template/public && reload -b",
