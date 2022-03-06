@@ -55,14 +55,14 @@ describe('detail', () => {
       .find('button')
       .should('have.attr', 'disabled');
 
-    // cy.reload();
-    // cy.waitPageIdle();
-    // cy.get('input[placeholder="アルバムタイトル"]').should('have.value', title);
-    // cy.get('textarea[placeholder="アルバム説明"]').should('have.value', des);
-    // cy.get('textarea[placeholder="アルバムまとめ"]').should(
-    //   'have.value',
-    //   conclution
-    // );
+    cy.reload();
+    cy.waitPageIdle();
+    cy.get('input[placeholder="アルバムタイトル"]').should('have.value', title);
+    cy.get('textarea[placeholder="アルバム説明"]').should('have.value', des);
+    cy.get('textarea[placeholder="アルバムまとめ"]').should(
+      'have.value',
+      conclution
+    );
   });
   it('should save album item info', () => {
     const rnd = new Date().getTime();
